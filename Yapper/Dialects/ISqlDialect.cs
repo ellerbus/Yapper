@@ -1,0 +1,55 @@
+﻿using System;
+
+namespace Yapper.Dialects
+{
+    /// <summary>
+    /// SQL dialect provides db specific functionality related to db specific SQL syntax
+    /// </summary>
+    public interface ISqlDialect
+    {
+        //string QueryString(string selection, string source, string conditions, 
+        //    string order, string grouping, string having);
+
+        //string QueryStringPage(string selection, string source, string conditions, string order,
+        //    int pageSize, int pageNumber);
+
+        //string QueryStringPage(string selection, string source, string conditions, string order,
+        //    int pageSize);
+
+        //string Table(string tableName);
+        //string Field(string tableName, string fieldName);
+
+
+        /// <summary>
+        /// Gets the delimiter used on to separate identifiers
+        /// </summary>
+        string StatementSeparator { get; }
+
+        /// <summary>
+        /// Gets the delimiter used on to separate identifiers
+        /// </summary>
+        string IdentifierSeparator { get; }
+
+        /// <summary>
+        /// Gets the delimiter used on the left hand side to escape an SQL identifier.
+        /// </summary>
+        string LeftDelimiter { get; }
+
+        /// <summary>
+        /// Gets the delimiter used on the right hand side to escape an SQL identifier.
+        /// </summary>
+        string RightDelimiter { get; }
+
+        /// <summary>
+        /// Gets the parameter value used to identify parameters
+        /// </summary>
+        string ParameterIdentifier { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        string EscapeIdentifier(string id);
+    }
+}

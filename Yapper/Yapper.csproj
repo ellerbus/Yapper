@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{721617BB-3C51-4171-8711-06E8249EACF1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Yapper</RootNamespace>
+    <AssemblyName>Yapper</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Augment">
+      <HintPath>..\packages\Augment.1.0.5305.28651\lib\net45\Augment.dll</HintPath>
+    </Reference>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.27\lib\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="EnsureThat">
+      <HintPath>..\packages\Ensure.That.2.0.0\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\EnsureThat.dll\EnsureThat.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Builders\DeleteBuilder.cs" />
+    <Compile Include="Builders\ExpressionBuilder.cs" />
+    <Compile Include="Builders\SqlBuilder.cs" />
+    <Compile Include="Dialects\DialectCollection.cs" />
+    <Compile Include="Dialects\ISqlDialect.cs" />
+    <Compile Include="Dialects\SqlCeDialect.cs" />
+    <Compile Include="Dialects\SqlDialect.cs" />
+    <Compile Include="Dialects\SqlServer2008Dialect.cs" />
+    <Compile Include="Dialects\SqlServer2012Dialect.cs" />
+    <Compile Include="Dialects\SQLiteDialect.cs" />
+    <Compile Include="Dialects\SqlServerDialect.cs" />
+    <Compile Include="Core\DbFactory.cs" />
+    <Compile Include="Core\DbContext.cs" />
+    <Compile Include="Core\DbUnitOfWork.cs" />
+    <Compile Include="DB.cs" />
+    <Compile Include="Extensions.cs" />
+    <Compile Include="ISqlBuilder.cs" />
+    <Compile Include="IDb.cs" />
+    <Compile Include="Mappers\BooleanValueMapAttribute.cs" />
+    <Compile Include="Mappers\EnumMapCollection.cs" />
+    <Compile Include="Mappers\EnumValueMapAttribute.cs" />
+    <Compile Include="Mappers\ObjectMap.cs" />
+    <Compile Include="Mappers\ObjectMapCollection.cs" />
+    <Compile Include="Mappers\PropertyMap.cs" />
+    <Compile Include="Mappers\PropertyMapCollection.cs" />
+    <Compile Include="Mappers\ValueMap.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Sql.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
