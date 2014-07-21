@@ -118,7 +118,7 @@ using (var db = DB.Open())
 	
 		//	must be explicitly called otherwise the 
 		//	dispose method will automatically rollback
-		//	trans.SaveChanges();
+		trans.Commit();
 		
 		//	if not called the dispose will automatically
 		//	rollback
