@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Augment;
 
 namespace Yapper.Dialects
 {
@@ -10,11 +11,16 @@ namespace Yapper.Dialects
     /// </summary>
     public sealed class SqlServer2012Dialect : SqlServerDialect, ISqlDialect
     {
-        //public string QueryStringPage(string source, string selection, string conditions, string order, 
-        //    int pageSize, int pageNumber)
-        //{
-        //    return string.Format("SELECT {0} FROM {1} {2} {3} OFFSET {4} ROWS FETCH NEXT {5} ROWS ONLY",
-        //                         selection, source, conditions, order, pageSize * (pageNumber - 1), pageSize);
-        //}
+        public override string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch)
+        {
+            if (offset > 0 || fetch > 0)
+            {
+                //  paging
+                return "select {0} from {1} {2} {3} {4} offset {5} rows fetch next {6} rows only"
+                    .FormatArgs(selection, source, conditions, grouping, order, offset, fetch);
+            }
+
+            return base.SelectStatement(selection, source, conditions, order, grouping, limit, offset, fetch);
+        }
     }
 }

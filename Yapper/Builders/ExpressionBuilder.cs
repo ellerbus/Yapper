@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Dynamic;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
-using EnsureThat;
 using Augment;
+using EnsureThat;
 using Yapper.Dialects;
 using Yapper.Mappers;
-using System.Dynamic;
 
 namespace Yapper.Builders
 {

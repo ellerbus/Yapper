@@ -12,8 +12,8 @@ namespace Yapper.Core
     {
         #region Members
 
-        private readonly Action<DbUnitOfWork> _onCommit;
-        private readonly Action<DbUnitOfWork> _onRollback;
+        private readonly Action<DbUnitOfWork> OnCommit;
+        private readonly Action<DbUnitOfWork> OnRollback;
 
         #endregion
 
@@ -39,8 +39,8 @@ namespace Yapper.Core
         {
             Transaction = transaction;
             
-            _onCommit = onCommit;
-            _onRollback = onRollback;
+            OnCommit = onCommit;
+            OnRollback = onRollback;
         }
 
         #endregion
@@ -48,34 +48,67 @@ namespace Yapper.Core
         #region Methods
 
         /// <summary>
-        /// Implements <see cref="IDisposable.Dispose"/>, and commits the statements executed inside this unit of work.
-        /// This makes it easier to use a unit of work instance inside a <c>using</c> statement (<c>Using</c> in VB.Net).
+        /// Rollback will and rollback all statements that have been executed against the database inside this unit of work.
         /// </summary>
-        public void Dispose()
+        /// <exception cref="InvalidOperationException">Thrown if this unit of work has already been committed or rolled back.</exception>
+        public void Rollback()
         {
-            if (Transaction == null)
+            Ensure.That(Transaction).IsNotNull();
+
+            try
             {
-                return;
+                Transaction.Rollback();
+
+                OnRollback(this);
             }
+            finally
+            {
+                Transaction.Dispose();
+
+                Transaction = null;
+            }
+        }
+
+        /// <summary>
+        /// SaveChanges will try and commit all statements that have been executed against the database inside this unit of work.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Thrown if this unit of work has already been committed or rolled back.</exception>
+        public void SaveChanges()
+        {
+            Ensure.That(Transaction).IsNotNull();
 
             try
             {
                 Transaction.Commit();
 
-                _onCommit(this);
-            }
-            catch(Exception)
-            {
-                Transaction.Rollback();
-
-                _onRollback(this);
-
-                throw;
+                OnCommit(this);
             }
             finally
             {
                 Transaction.Dispose();
-                
+
+                Transaction = null;
+            }
+        }
+
+        /// <summary>
+        /// Implements <see cref="IDisposable.Dispose"/>, and rolls back the statements executed inside this unit of work.
+        /// This makes it easier to use a unit of work instance inside a <c>using</c> statement (<c>Using</c> in VB.Net).
+        /// </summary>
+        public void Dispose()
+        {
+            if (Transaction == null) return;
+
+            try
+            {
+                Transaction.Rollback();
+
+                OnRollback(this);
+            }
+            finally
+            {
+                Transaction.Dispose();
+
                 Transaction = null;
             }
         }

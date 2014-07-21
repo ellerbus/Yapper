@@ -1,9 +1,8 @@
-﻿/* License: http://www.apache.org/licenses/LICENSE-2.0 */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Augment;
 
 namespace Yapper.Dialects
 {
@@ -12,27 +11,17 @@ namespace Yapper.Dialects
     /// </summary>
     public class SqlServerDialect : SqlDialect
     {
-        //public string QueryStringPage(string source, string selection, string conditions, string order,
-        //    int pageSize)
-        //{
-        //    return string.Format("SELECT TOP({4}) {0} FROM {1} {2} {3}",
-        //            selection, source, conditions, order, pageSize);
-        //}
+        public override string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch)
+        {
+            if (limit > 0)
+            {
+                return "select top({0}) {1} from {2} {3} {4} {5}"
+                    .FormatArgs(limit, selection, source, conditions, grouping, order);
+            }
 
+            return base.SelectStatement(selection, source, conditions, order, grouping, limit, offset, fetch);
+        }
 
-        //public string Table(string tableName)
-        //{
-        //    return string.Format("[{0}]", tableName);
-        //}
-
-        //public string Field(string tableName, string fieldName)
-        //{
-        //    return string.Format("[{0}].[{1}]", tableName, fieldName);
-        //}
-
-        //public string Parameter(string parameterId)
-        //{
-        //    return "@" + parameterId;
-        //}
+        public override string SelectIdentity { get { return StatementSeparator + "select SCOPE_IDENTITY()"; } }
     }
 }

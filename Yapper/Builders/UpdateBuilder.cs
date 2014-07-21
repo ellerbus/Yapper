@@ -7,16 +7,15 @@ using System.Reflection;
 using System.Text;
 using EnsureThat;
 using Augment;
-using Yamor.Dialects;
-using Yamor.Mappers;
-using Yamor.ResourceMessages;
+using Yapper.Dialects;
+using Yapper.Mappers;
 
-namespace Yamor.Builders
+namespace Yapper.Builders
 {
     /// <summary>
     /// Implementation for UpdateBuilder
     /// </summary>
-    internal class UpdateBuilder<T> : StatementBuilder, IUpdateBuilder<T> where T : class
+    internal sealed class UpdateBuilder<T> : SqlBuilder, IUpdateBuilder<T>, IUpdateWhereAndOrBuilder<T>
     {
         #region Constructors
 
@@ -24,8 +23,19 @@ namespace Yamor.Builders
         /// 
         /// </summary>
         /// <param name="session"></param>
-        public UpdateBuilder(ISession session)
-            : base(session, typeof(T))
+        public UpdateBuilder(ISqlDialect dialect, T item)
+            : this(dialect)
+        {
+            AppendSet(item, true);
+            AppendWhereAnd(item, true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="session"></param>
+        public UpdateBuilder(ISqlDialect dialect)
+            : base(dialect, typeof(T))
         {
             SetClause = new StringBuilder();
         }
@@ -34,115 +44,49 @@ namespace Yamor.Builders
 
         #region Methods
 
+        private void AppendSet(object values, bool excludePrimaryKeys = false)
+        {
+            foreach (PropertyInfo p in values.GetType().GetProperties())
+            {
+                PropertyMap pm = ObjectMap.Properties[p.Name];
+
+                bool add = true;
+
+                if (excludePrimaryKeys)
+                {
+                    //  don't add the PK
+                    add = !pm.IsPrimaryKey;
+                }
+
+                if (add && pm.IsUpdatable)
+                {
+                    SetClause.AppendIf(SetClause.Length > 0, " ,")
+                        .Append(Dialect.EscapeIdentifier(pm.SourceName))
+                        .Append(" = ")
+                        .Append(AppendParameter(pm, p.GetValue(values)))
+                        ;
+                }
+            }
+        }
+
         /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
-        public IBuilderResults BuildQuery()
+        protected override string GetQuery()
         {
             StringBuilder sb = new StringBuilder("update ")
-                .Append(Dialect.EscapeIdentifier(ObjectMap.SourceName));
-
-            Ensure.That(SetClause.Length > 0)
-                .WithExtraMessageOf(() => "Missing Set Clause")
-                .IsTrue()
-                ;
-
-            sb.Append(" set ").Append(SetClause.ToString());
+                .Append(Dialect.EscapeIdentifier(ObjectMap.SourceName))
+                .Append(" set ").Append(SetClause.ToString());
 
             if (WhereClause.Length > 0)
             {
                 sb.Append(" where ").Append(WhereClause.ToString());
             }
 
-            IBuilderResults results = new BuilderResults();
+            Parameters = BuilderParameters.ToExpando();
 
-            results.SqlQuery = sb.ToString();
-            results.Parameters = new Dictionary<string, IParameter>(Parameters);
-
-            return results;
-        }
-
-        #endregion
-
-        #region IUpdateBuilder<T> Members
-
-        public IUpdateBuilder<T> Set(object values)
-        {
-            foreach (PropertyInfo p in values.GetType().GetProperties())
-            {
-                PropertyMap pm = ObjectMap.Properties[p.Name];
-
-                SetClause.AppendIf(SetClause.Length > 0, " ,")
-                    .Append(Dialect.EscapeIdentifier(pm.SourceName))
-                    .Append(" = ")
-                    .Append(AppendParameter(pm, p.GetValue(values)))
-                    ;
-
-            }
-
-            return this;
-        }
-
-        public IUpdateBuilder<T> Set<TField>(Expression<Func<T, TField>> field, object value)
-        {
-            string nm = GetPropertyName<T, TField>(field);
-
-            PropertyMap pm = ObjectMap.Properties[nm];
-
-            SetClause.AppendIf(SetClause.Length > 0, " ,")
-                .Append(Dialect.EscapeIdentifier(pm.SourceName))
-                .Append(" = ")
-                .Append(AppendParameter(pm, value))
-                ;
-
-            return this;
-        }
-
-        public IUpdateBuilder<T> Set<TField, TValue>(Expression<Func<T, TField>> field, Expression<Func<T, TValue>> expression)
-        {
-            string nm = GetPropertyName<T, TField>(field);
-
-            PropertyMap pm = ObjectMap.Properties[nm];
-
-            Ensure.That(expression).IsNotNull();
-
-            ExpressionBuilder e = new ExpressionBuilder(Driver, Parameters.Count);
-
-            IBuilderResults results = e.Compile(expression);
-
-            if (results.SqlQuery.IsNotEmpty())
-            {
-                SetClause.AppendIf(SetClause.Length > 0, " ,")
-                   .Append(Dialect.EscapeIdentifier(pm.SourceName))
-                   .Append(" = ").Append(results.SqlQuery)
-                   ;
-
-                AppendParameters(results.Parameters);
-            }
-
-            return this;
-        }
-
-        public int Execute()
-        {
-            IBuilderResults results = BuildQuery();
-
-            return ExecuteNonQuery(results);
-        }
-
-        public IUpdateBuilder<T> Where(object values)
-        {
-            AppendWhere(values);
-
-            return this;
-        }
-
-        public IUpdateBuilder<T> Where(Expression<Func<T, bool>> where)
-        {
-            AppendWhere(where);
-
-            return this;
+            return sb.ToString();
         }
 
         #endregion
@@ -152,7 +96,100 @@ namespace Yamor.Builders
         /// <summary>
         /// 
         /// </summary>
-        protected StringBuilder SetClause { get; private set; }
+        private StringBuilder SetClause { get; set; }
+
+        #endregion
+
+        #region IUpdateBuilder<T> Members
+
+        public IUpdateBuilder<T> Set(object values)
+        {
+            AppendSet(values, false);
+
+            return this;
+        }
+
+        public IUpdateBuilder<T> Set<K, V>(Expression<Func<T, K>> field, Expression<Func<T, V>> expression)
+        {
+            string nm = GetPropertyName<T, K>(field);
+
+            PropertyMap pm = ObjectMap.Properties[nm];
+
+            Ensure.That(expression).IsNotNull();
+
+            ExpressionBuilder e = new ExpressionBuilder(Dialect, BuilderParameters.Count);
+
+            e.Compile(expression);
+
+            if (e.Query.IsNotEmpty())
+            {
+                SetClause.AppendIf(SetClause.Length > 0, " ,")
+                   .Append(Dialect.EscapeIdentifier(pm.SourceName))
+                   .Append(" = ").Append(e.Query)
+                   ;
+
+                AppendParameters(e.Parameters);
+            }
+
+            return this;
+        }
+
+        #endregion
+
+        #region IWhereBuilder<IUpdateWhereAndOrBuilder<T>,T> Members
+
+        public ISqlQuery Where(T item)
+        {
+            AppendWhereAnd(item, true);
+
+            return this;
+        }
+
+        public IUpdateWhereAndOrBuilder<T> Where(object where)
+        {
+            AppendWhereAnd(where);
+
+            return this;
+        }
+
+        public IUpdateWhereAndOrBuilder<T> Where(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereAnd(expression);
+
+            return this;
+        }
+
+        #endregion
+
+        #region IWhereAndOrBuilder<IUpdateWhereAndOrBuilder<T>,T> Members
+
+        public IUpdateWhereAndOrBuilder<T> And(object where)
+        {
+            AppendWhereAnd(where);
+
+            return this;
+        }
+
+        public IUpdateWhereAndOrBuilder<T> And(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereAnd(expression);
+
+            return this;
+        }
+
+        public IUpdateWhereAndOrBuilder<T> Or(object where)
+        {
+            AppendWhereOr(where);
+
+            return this;
+        }
+
+        public IUpdateWhereAndOrBuilder<T> Or(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereOr(expression);
+
+            return this;
+        }
 
         #endregion
     }

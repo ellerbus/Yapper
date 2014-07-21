@@ -43,14 +43,16 @@ namespace Yapper.Builders
 
         #region Helper Methods
 
+        protected abstract string GetQuery();
+
         /// <summary>
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <typeparam name="TField"></typeparam>
+        /// <typeparam name="K"></typeparam>
         /// <param name="field"></param>
         /// <returns></returns>
-        protected string GetPropertyName<T, TField>(Expression<Func<T, TField>> field)
+        protected string GetPropertyName<T, K>(Expression<Func<T, K>> field)
         {
             Ensure.That(field).IsNotNull();
 
@@ -68,7 +70,7 @@ namespace Yapper.Builders
             {
                 string message = "Expression '{0}' not supported.".FormatArgs(field);
 
-                throw new ArgumentException(message, "Field");
+                throw new ArgumentException(message, "field");
             }
 
             return expr.Member.Name;
@@ -180,8 +182,32 @@ namespace Yapper.Builders
         /// 
         /// </summary>
         /// <param name="values"></param>
-        protected void AppendWhere(object values, bool primaryKeyOnly = false)
+        protected void AppendWhereAnd(object values, bool primaryKeyOnly = false)
         {
+            WhereClause.AppendIf(WhereClause.Length > 0, " and ").Append("(");
+
+            AppendWhere(values, primaryKeyOnly);
+
+            WhereClause.Append(")");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        protected void AppendWhereOr(object values)
+        {
+            WhereClause.AppendIf(WhereClause.Length > 0, " or ").Append("(");
+
+            AppendWhere(values, false);
+
+            WhereClause.Append(")");
+        }
+
+        private void AppendWhere(object values, bool primaryKeyOnly = false)
+        {
+            StringBuilder sb = new StringBuilder();
+
             foreach (PropertyInfo p in values.GetType().GetProperties())
             {
                 PropertyMap pm = ObjectMap.Properties[p.Name];
@@ -195,13 +221,41 @@ namespace Yapper.Builders
 
                 if (add)
                 {
-                    WhereClause.AppendIf(WhereClause.Length > 0, " and ")
+                    sb.AppendIf(sb.Length > 0, " and ")
                         .Append(Dialect.EscapeIdentifier(pm.SourceName))
                         .Append(" = ")
                         .Append(AppendParameter(pm, p.GetValue(values)))
                         ;
                 }
             }
+
+            WhereClause.Append(sb);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        protected void AppendWhereAnd(Expression where)
+        {
+            WhereClause.AppendIf(WhereClause.Length > 0, " and ").Append("(");
+
+            AppendWhere(where);
+
+            WhereClause.Append(")");
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="values"></param>
+        protected void AppendWhereOr(Expression where)
+        {
+            WhereClause.AppendIf(WhereClause.Length > 0, " or ").Append("(");
+
+            AppendWhere(where);
+
+            WhereClause.Append(")");
         }
 
         /// <summary>
@@ -209,17 +263,15 @@ namespace Yapper.Builders
         /// </summary>
         /// <param name="where"></param>
         /// <returns></returns>
-        protected void AppendWhere(Expression where)
+        private void AppendWhere(Expression where)
         {
-            Ensure.That(where).IsNotNull();
-
             ExpressionBuilder e = new ExpressionBuilder(Dialect, BuilderParameters.Count);
 
             e.Compile(where);
 
             if (e.Query.IsNotEmpty())
             {
-                WhereClause.AppendIf(WhereClause.Length > 0, " and ").Append(e.Query);
+                WhereClause.Append(e.Query);
 
                 AppendParameters(e.Parameters);
             }
@@ -242,12 +294,23 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        public virtual string Query { get; protected set; }
+        public string Query
+        {
+            get
+            {
+                if (_query.IsNullOrEmpty())
+                {
+                    _query = GetQuery();
+                }
+                return _query;
+            }
+        }
+        private string _query;
 
         /// <summary>
         /// 
         /// </summary>
-        public virtual ExpandoObject Parameters { get; protected set; }
+        public ExpandoObject Parameters { get; protected set; }
 
         /// <summary>
         /// 

@@ -46,6 +46,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -63,6 +64,9 @@
     <Compile Include="Builders\BuilderTests.cs" />
     <Compile Include="Builders\DeleteBuilderTests.cs" />
     <Compile Include="Builders\ExpressionBuilderTests.cs" />
+    <Compile Include="Builders\InsertBuilderTests.cs" />
+    <Compile Include="Builders\SelectBuilderTests.cs" />
+    <Compile Include="Builders\UpdateBuilderTests.cs" />
     <Compile Include="DataObjects\ComplexObject.cs" />
     <Compile Include="DataObjects\CompositeKeyObject.cs" />
     <Compile Include="DataObjects\IdentityObject.cs" />
@@ -71,7 +75,8 @@
     <Compile Include="Mappers\PropertyMapTests.cs" />
     <Compile Include="Mappers\ValueMapTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="MsSqlIntegrationTests.cs" />
+    <Compile Include="StringExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Yapper\Yapper.csproj">
@@ -80,13 +85,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\Northwind.MDF">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="Data\NorthwindSqlCe4.0.sdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

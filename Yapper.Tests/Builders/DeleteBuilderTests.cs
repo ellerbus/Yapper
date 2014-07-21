@@ -44,12 +44,32 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [IDENTITY_OBJECT] where ([id] > @p0)";
+            var sql = "delete from [IDENTITY_OBJECT] where (([id] > @p0))";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(1, parameters.Count);
             Assert.AreEqual(0, parameters["p0"]);
+        }
+
+        [TestMethod]
+        public void DeleteBuilder_Should_Delete_Many_For_TypedObject()
+        {
+            //  arrange
+            var b = Sql.Delete<CompositeKeyObject>(DefaultCompositeKeyObject);
+
+            //  act
+            var query = b.Query;
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([parent_id] = @p0 and [this_id] = @p1)";
+
+            //  assert
+            Assert.AreEqual(sql, query);
+            Assert.AreEqual(2, parameters.Count);
+            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["p0"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["p1"]);
         }
 
         [TestMethod]
@@ -65,7 +85,7 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [IDENTITY_OBJECT] where [id] = @p0";
+            var sql = "delete from [IDENTITY_OBJECT] where ([id] = @p0)";
 
             //  assert
             Assert.AreEqual(sql, query);
@@ -74,25 +94,25 @@ namespace Yapper.Tests.Builders
         }
 
         [TestMethod]
-        public void DeleteBuilder_Should_Delete_Many_For_TypedObject()
+        public void DeleteBuilder_Should_Delete_Many_For_AnonymousObject_Or()
         {
             //  arrange
             var b = Sql.Delete<CompositeKeyObject>();
 
-            b.Where(DefaultCompositeKeyObject);
+            b.Where(new { Name = "abc" }).Or(new { ParentID = 123 });
 
             //  act
             var query = b.Query;
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [COMPOSITE_KEY_OBJECT] where [parent_id] = @p0 and [this_id] = @p1";
+            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([Name] = @p0) or ([parent_id] = @p1)";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["p0"]);
-            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["p1"]);
+            Assert.AreEqual("abc", parameters["p0"]);
+            Assert.AreEqual(123, parameters["p1"]);
         }
     }
 }

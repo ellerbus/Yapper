@@ -1,9 +1,8 @@
-﻿/* License: http://www.apache.org/licenses/LICENSE-2.0 */
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Augment;
 
 namespace Yapper.Dialects
 {
@@ -12,14 +11,18 @@ namespace Yapper.Dialects
     /// </summary>
     public sealed class SqlServer2008Dialect : SqlServerDialect, ISqlDialect
     {
-        //public string QueryStringPage(string source, string selection, string conditions, string order,
-        //    int pageSize, int pageNumber)
-        //{
-        //    var innerQuery = string.Format("SELECT {0},ROW_NUMBER() OVER ({1}) AS RN FROM {2} {3}",
-        //                                   selection, order, source, conditions);
+        public override string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch)
+        {
+            if (offset > 0 || fetch > 0)
+            {
+                string innerSql = "select {0}, row_number() over ({1}) as rownbr from {2} {3}"
+                    .FormatArgs(selection, order, source, conditions);
 
-        //    return string.Format("SELECT TOP {0} * FROM ({1}) InnerQuery WHERE RN > {2} ORDER BY RN",
-        //                         pageSize, innerQuery, pageSize*(pageNumber - 1));
-        //}
+                return "select * from ({0}) x where x.rownbr between {1} and {2}"
+                    .FormatArgs(innerSql, offset + 1, offset + fetch);
+            }
+
+            return base.SelectStatement(selection, source, conditions, order, grouping, limit, offset, fetch);
+        }
     }
 }

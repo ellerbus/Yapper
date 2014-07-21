@@ -8,45 +8,43 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsureThat;
 using Augment;
-using Yamor.Dialects;
-using Yamor.Logging;
-using Yamor.Mappers;
-using Yamor.ResourceMessages;
+using Yapper.Dialects;
+using Yapper.Mappers;
 
-namespace Yamor.Builders
+namespace Yapper.Builders
 {
     /// <summary>
-    /// Base class for building select statements (non-crud like ie. UpdateMany, DeleteMany, SelectMany)
+    /// Implementation for SelectBuilder
     /// </summary>
-    /// <typeparam name="T"></typeparam>
-    internal class SelectBuilder<T> : StatementBuilder, ISelectBuilder<T> where T : class, new()
+    internal sealed class SelectBuilder<T> : SqlBuilder,
+        ISelectBuilder<T>,
+        ISelectAndOrOrderByBuilder<T>,
+        ISelectOrderByBuilder<T>,
+        ISelectThenByBuilder<T>,
+        ISelectPageBuilder<T>
     {
-        #region Members
-
-        private static readonly ILog log = LogManager.GetCurrentClassLog();
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="session"></param>
-        public SelectBuilder(ISession session)
-            : base(session, typeof(T))
+        public SelectBuilder(ISqlDialect dialect, T item)
+            : this(dialect)
+        {
+            AppendWhereAnd(item, true);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="session"></param>
+        public SelectBuilder(ISqlDialect dialect)
+            : base(dialect, typeof(T))
         {
             SelectClause = new StringBuilder();
+            FromClause = new StringBuilder();
             OrderByClause = new StringBuilder();
-
-            foreach (PropertyMap p in ObjectMap.Properties.Where(x => x.HasPropertySetter))
-            {
-                SelectClause.AppendIf(SelectClause.Length > 0, ", ")
-                    .Append(Dialect.EscapeIdentifier(p.SourceName))
-                    .Append(" as ")
-                    .Append(Dialect.EscapeIdentifier(p.Name))
-                    ;
-            }
         }
 
         #endregion
@@ -57,281 +55,80 @@ namespace Yamor.Builders
         /// 
         /// </summary>
         /// <returns></returns>
-        public IBuilderResults BuildQuery()
+        protected override string GetQuery()
         {
-            IBuilderResults results = new BuilderResults();
-
-            if (IsPaging)
+            if (SelectClause.Length == 0)
             {
-                results.SqlQuery = BuildPagedSelect();
-            }
-            else
-            {
-                results.SqlQuery = BuildSelect(Top);
+                foreach (PropertyMap pm in ObjectMap.Properties.Where(x => x.IsSelectable))
+                {
+                    AppendSelect(pm);
+                }
             }
 
-            results.Parameters = new Dictionary<string, IParameter>(Parameters);
-
-            return results;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public IBuilderResults BuildCountQuery()
-        {
-            IBuilderResults results = new BuilderResults();
-
-            results.SqlQuery = BuildCountSelect();
-
-            results.Parameters = new Dictionary<string, IParameter>(Parameters);
-
-            return results;
-        }
-
-        protected virtual string BuildPagedSelect()
-        {
-            StringBuilder sb = new StringBuilder("select ");
-
-            sb.Append(SelectClause)
-                .Append(" from ").Append(Dialect.EscapeIdentifier(ObjectMap.SourceName))
-                ;
+            if (FromClause.Length == 0)
+            {
+                FromClause.Append(Dialect.EscapeIdentifier(ObjectMap.SourceName));
+            }
 
             if (WhereClause.Length > 0)
             {
-                sb.Append(" where ").Append(WhereClause.ToString());
+                WhereClause.Insert(0, "where ");
             }
 
-            if (OrderByClause.Length == 0)
+            if (OrderByClause.Length == 0 && IsPaging && ObjectMap.HasPrimaryKey)
             {
-                DefaultOrderByClause();
-            }
-
-            sb.Append(" order by ").Append(OrderByClause.ToString());
-
-            sb.Append(" limit ").Append(Start).Append(", ").Append(Offset);
-
-            return sb.ToString();
-        }
-
-        protected void DefaultOrderByClause()
-        {
-            OrderByClause.Clear();
-
-            foreach (PropertyMap p in ObjectMap.Properties.Where(x => x.IsPrimaryKey))
-            {
-                AppendOrderBy(p, false);
-            }
-        }
-
-        protected virtual string BuildSelect(int top)
-        {
-            StringBuilder sb = new StringBuilder("select ");
-
-            sb.Append(SelectClause)
-                .Append(" from ").Append(Dialect.EscapeIdentifier(ObjectMap.SourceName))
-                ;
-
-            if (WhereClause.Length > 0)
-            {
-                sb.Append(" where ").Append(WhereClause.ToString());
+                //  default to PK
+                foreach (PropertyMap pm in ObjectMap.Properties.Where(x => x.IsPrimaryKey))
+                {
+                    AppendOrderBy(pm, false);
+                }
             }
 
             if (OrderByClause.Length > 0)
             {
-                sb.Append(" order by ").Append(OrderByClause.ToString());
+                OrderByClause.Insert(0, "order by ");
             }
 
-            if (top > 0)
+            Parameters = BuilderParameters.ToExpando();
+
+            return Dialect.SelectStatement(
+                SelectClause.ToString(),
+                FromClause.ToString(),
+                WhereClause.ToString(),
+                OrderByClause.ToString(),
+                null,
+                Limit,
+                PageNumber > 0 ? PageNumber - 1 : 0, ItemsPerPage
+                );
+        }
+
+        private void AppendSelect<TField>(Expression<Func<T, TField>> field, string sqlFunction = null)
+        {
+            string nm = GetPropertyName(field);
+
+            PropertyMap pm = ObjectMap.Properties[nm];
+
+            AppendSelect(pm, sqlFunction);
+        }
+
+        private void AppendSelect(PropertyMap pm, string sqlFunction = null)
+        {
+            if (sqlFunction.IsNullOrEmpty())
             {
-                sb.Append(" limit ").Append(top);
+                SelectClause.AppendIf(SelectClause.Length > 0, ", ")
+                    .Append(Dialect.EscapeIdentifier(pm.SourceName))
+                    .Append(" as ")
+                    .Append(Dialect.EscapeIdentifier(pm.Name))
+                    ;
             }
-
-            return sb.ToString();
-        }
-
-        protected virtual string BuildCountSelect(int top = 0)
-        {
-            StringBuilder sb = new StringBuilder("select ");
-
-            sb.Append("count(1)")
-                .Append(" from ").Append(Dialect.EscapeIdentifier(ObjectMap.SourceName))
-                ;
-
-            if (WhereClause.Length > 0)
+            else
             {
-                sb.Append(" where ").Append(WhereClause.ToString());
+                SelectClause.AppendIf(SelectClause.Length > 0, ", ")
+                    .Append(sqlFunction).Append("(").Append(Dialect.EscapeIdentifier(pm.SourceName)).Append(")")
+                    .Append(" as ")
+                    .Append(Dialect.EscapeIdentifier(pm.Name))
+                    ;
             }
-
-            return sb.ToString();
-        }
-
-        #endregion
-
-        #region ISelectBuilder<T> Members
-
-        public int Count()
-        {
-            IBuilderResults results = BuildCountQuery();
-
-            object value = ExecuteScalar(results);
-
-            return (int)Convert.ChangeType(value, typeof(int));
-        }
-
-        public IList<T> ToList()
-        {
-            IBuilderResults results = BuildQuery();
-
-            IList<T> items = ExecuteObjects(results);
-
-            return items;
-        }
-
-        public IPagedList<T> ToPagedList(int page, int itemsPerPage)
-        {
-            PageNumber = page;
-            ItemsPerPage = itemsPerPage;
-            Top = 0;
-
-            IBuilderResults results = BuildQuery();
-
-            IList<T> items = ExecuteObjects(results);
-
-            PagedList<T> pagedList = new PagedList<T>()
-            {
-                Items = items,
-                Page = page,
-                ItemsPerPage = itemsPerPage,
-                TotalItems = Count()
-            };
-
-            return pagedList;
-        }
-
-        public T FirstOrDefault()
-        {
-            IBuilderResults results = BuildQuery();
-
-            T item = ExecuteObject(results);
-
-            return item;
-        }
-
-        public ISelectBuilder<T> Limit(int top)
-        {
-            PageNumber = 0;
-            ItemsPerPage = 0;
-            Top = top;
-
-            return this;
-        }
-
-        public ISelectBuilder<T> OrderBy<TField>(Expression<Func<T, TField>> field)
-        {
-            AppendOrderBy(field, true, false);
-
-            return this;
-        }
-
-        public ISelectBuilder<T> ThenBy<TField>(Expression<Func<T, TField>> field)
-        {
-            AppendOrderBy(field, false, false);
-
-            return this;
-        }
-
-        public ISelectBuilder<T> OrderByDescending<TField>(Expression<Func<T, TField>> field)
-        {
-            AppendOrderBy(field, true, true);
-
-            return this;
-        }
-
-        public ISelectBuilder<T> ThenByDescending<TField>(Expression<Func<T, TField>> field)
-        {
-            AppendOrderBy(field, false, true);
-
-            return this;
-        }
-
-        public ISelectBuilder<T> Where(object values)
-        {
-            AppendWhere(values);
-
-            return this;
-        }
-
-        public ISelectBuilder<T> Where(Expression<Func<T, bool>> expression)
-        {
-            AppendWhere(expression);
-
-            return this;
-        }
-
-        #endregion
-
-        #region Methods
-
-        private IList<T> ExecuteObjects(IBuilderResults results)
-        {
-            using (IDbCommand cmd = Session.CreateCommand(results))
-            {
-                Func<IDbCommand, IList<T>> action = (x) =>
-                {
-                    IList<T> items = new List<T>();
-
-                    using (IDataReader reader = cmd.ExecuteReader())
-                    {
-                        while (reader.Read())
-                        {
-                            items.Add(CreateObject(reader));
-                        }
-                    }
-
-                    return items;
-                };
-
-                return ExecuteCommand(cmd, action);
-            }
-        }
-
-        private T ExecuteObject(IBuilderResults results)
-        {
-            using (IDbCommand cmd = Session.CreateCommand(results))
-            {
-                Func<IDbCommand, T> action = (x) =>
-                {
-                    T item = null;
-
-                    using (IDataReader reader = cmd.ExecuteReader())
-                    {
-                        if (reader.Read())
-                        {
-                            item = CreateObject(reader);
-                        }
-                    }
-
-                    return item;
-                };
-
-                return ExecuteCommand(cmd, action);
-            }
-        }
-
-        private T CreateObject(IDataReader reader)
-        {
-            T item = new T();
-
-            foreach (PropertyMap p in ObjectMap.Properties.Where(x => x.IsSelectable))
-            {
-                object value = p.ConvertToClrValue(reader[p.Name]);
-
-                p.SetValue(item, value);
-            }
-
-            return item;
         }
 
         private void AppendOrderBy<TField>(Expression<Func<T, TField>> field, bool clear, bool desc)
@@ -348,12 +145,7 @@ namespace Yamor.Builders
             AppendOrderBy(pm, desc);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="pm"></param>
-        /// <param name="desc"></param>
-        protected void AppendOrderBy(PropertyMap pm, bool desc)
+        private void AppendOrderBy(PropertyMap pm, bool desc)
         {
             OrderByClause.AppendIf(OrderByClause.Length > 0, ", ")
                 .Append(Dialect.EscapeIdentifier(pm.SourceName))
@@ -363,37 +155,205 @@ namespace Yamor.Builders
 
         #endregion
 
+        #region ISelectBuilder<T> Members
+
+        public ISelectBuilder<T> Top(int top)
+        {
+            Ensure.That(top)
+                .WithExtraMessageOf(() => "Top must be greater than zero")
+                .IsGt(0);
+
+            Limit = top;
+
+            PageNumber = 0;
+
+            ItemsPerPage = 0;
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Select<K>(Expression<Func<T, K>> select)
+        {
+            AppendSelect(select);
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Max<K>(Expression<Func<T, K>> max)
+        {
+            AppendSelect(max, "MAX");
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Min<K>(Expression<Func<T, K>> min)
+        {
+            AppendSelect(min, "MIN");
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Avg<K>(Expression<Func<T, K>> avg)
+        {
+            AppendSelect(avg, "AVG");
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Sum<K>(Expression<Func<T, K>> sum)
+        {
+            AppendSelect(sum, "SUM");
+
+            return this;
+        }
+
+        #endregion
+
+        #region IWhereBuilder<ISelectAndOrOrderByBuilder<T>,T> Members
+
+        public ISelectAndOrOrderByBuilder<T> Where(object where)
+        {
+            AppendWhereAnd(where);
+
+            return this;
+        }
+
+        public ISelectAndOrOrderByBuilder<T> Where(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereAnd(expression);
+
+            return this;
+        }
+
+        #endregion
+
+        #region IWhereAndOrBuilder<ISelectAndOrOrderByBuilder<T>,T> Members
+
+        public ISelectAndOrOrderByBuilder<T> And(object where)
+        {
+            AppendWhereAnd(where);
+
+            return this;
+        }
+
+        public ISelectAndOrOrderByBuilder<T> And(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereAnd(expression);
+
+            return this;
+        }
+
+        public ISelectAndOrOrderByBuilder<T> Or(object where)
+        {
+            AppendWhereOr(where);
+
+            return this;
+        }
+
+        public ISelectAndOrOrderByBuilder<T> Or(Expression<Func<T, bool>> expression)
+        {
+            AppendWhereOr(expression);
+
+            return this;
+        }
+
+        #endregion
+
+        #region ISelectOrderByBuilder<T> Members
+
+        public ISelectThenByBuilder<T> OrderBy<K>(Expression<Func<T, K>> orderby)
+        {
+            AppendOrderBy(orderby, true, false);
+
+            return this;
+        }
+
+        public ISelectThenByBuilder<T> OrderByDescending<K>(Expression<Func<T, K>> orderby)
+        {
+            AppendOrderBy(orderby, true, true);
+
+            return this;
+        }
+
+        #endregion
+
+        #region ISelectThenByBuilder<T> Members
+
+        public ISelectThenByBuilder<T> ThenBy<K>(Expression<Func<T, K>> thenby)
+        {
+            AppendOrderBy(thenby, false, false);
+
+            return this;
+        }
+
+        public ISelectThenByBuilder<T> ThenByDescending<K>(Expression<Func<T, K>> thenby)
+        {
+            AppendOrderBy(thenby, false, true);
+
+            return this;
+        }
+
+        #endregion
+
+        #region ISelectPageBuilder<T> Members
+
+        public ISqlQuery Page(int page, int itemsPerPage)
+        {
+            Ensure.That(page)
+                .WithExtraMessageOf(() => "Top Page be greater than one")
+                .IsGt(0);
+
+            Ensure.That(itemsPerPage)
+                .WithExtraMessageOf(() => "Item per Page be greater than zero")
+                .IsGt(0);
+
+            Limit = 0;
+
+            PageNumber = page;
+
+            ItemsPerPage = itemsPerPage;
+
+            return this;
+        }
+
+        #endregion
+
         #region Properties
 
         /// <summary>
         /// 
         /// </summary>
-        protected StringBuilder SelectClause { get; private set; }
+        private StringBuilder SelectClause { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        protected StringBuilder OrderByClause { get; private set; }
+        private StringBuilder FromClause { get; set; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private StringBuilder OrderByClause { get; set; }
 
         /// <summary>
         /// 1 based index
         /// </summary>
-        protected int PageNumber { get; private set; }
+        private int PageNumber { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        protected int ItemsPerPage { get; private set; }
+        private int ItemsPerPage { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        protected int Top { get; private set; }
+        private int Limit { get; set; }
 
         /// <summary>
         /// The start for a paged result set
         /// </summary>
-        protected virtual int Start
+        private int Start
         {
             get { return ((PageNumber - 1) * ItemsPerPage) + 1; }
         }
@@ -401,7 +361,7 @@ namespace Yamor.Builders
         /// <summary>
         /// The offset for a paged result set
         /// </summary>
-        protected virtual int Offset
+        private int Offset
         {
             get { return ItemsPerPage * PageNumber; }
         }
@@ -409,7 +369,7 @@ namespace Yamor.Builders
         /// <summary>
         /// 
         /// </summary>
-        protected bool IsPaging
+        private bool IsPaging
         {
             get { return PageNumber > 0 && ItemsPerPage > 0; }
         }

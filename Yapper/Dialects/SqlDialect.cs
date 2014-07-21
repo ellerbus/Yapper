@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using EnsureThat;
+using Augment;
 
 namespace Yapper.Dialects
 {
@@ -11,13 +10,25 @@ namespace Yapper.Dialects
     /// </summary>
     public abstract class SqlDialect : ISqlDialect
     {
-        //public string QueryString(string selection, string source, string conditions, string order, string grouping, string having)
-        //{
-        //    return string.Format("SELECT {0} FROM {1} {2} {3} {4} {5}",
-        //                         selection, source, conditions, order, grouping, having);
-        //}
-
         #region ISqlDialect Members
+
+        public virtual string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch)
+        {
+            Ensure.That(limit)
+                .WithExtraMessageOf(() => "Top (or limit) is not supported")
+                .Is(0);
+
+            Ensure.That(offset)
+                .WithExtraMessageOf(() => "Paging is not supported")
+                .Is(0);
+
+            Ensure.That(fetch)
+                .WithExtraMessageOf(() => "Paging is not supported")
+                .Is(0);
+
+            return "select {0} from {1} {2} {3} {4}"
+                .FormatArgs(selection, source, conditions, order, grouping);
+        }
 
         public virtual string StatementSeparator { get { return ";"; } }
 
@@ -28,6 +39,8 @@ namespace Yapper.Dialects
         public virtual string RightDelimiter { get { return "]"; } }
 
         public virtual string ParameterIdentifier { get { return "@"; } }
+
+        public abstract string SelectIdentity { get; }
 
         #endregion
 

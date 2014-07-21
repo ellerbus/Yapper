@@ -24,8 +24,9 @@ namespace Yapper
 
         public static ISqlQuery Insert<T>(T item)
         {
+            InsertBuilder<T> builder = new InsertBuilder<T>(Dialect, item);
 
-            throw new NotImplementedException();
+            return builder;
         }
 
         #endregion
@@ -41,9 +42,7 @@ namespace Yapper
 
         public static ISqlQuery Delete<T>(T item)
         {
-            DeleteBuilder<T> builder = new DeleteBuilder<T>(Dialect);
-
-            builder.Where(item);
+            DeleteBuilder<T> builder = new DeleteBuilder<T>(Dialect, item);
 
             return builder;
         }
@@ -54,13 +53,16 @@ namespace Yapper
 
         public static IUpdateBuilder<T> Update<T>()
         {
-            throw new NotImplementedException();
+            UpdateBuilder<T> builder = new UpdateBuilder<T>(Dialect);
+
+            return builder;
         }
 
         public static ISqlQuery Update<T>(T item)
         {
+            IUpdateBuilder<T> builder = new UpdateBuilder<T>(Dialect, item);
 
-            throw new NotImplementedException();
+            return builder;
         }
 
         #endregion
@@ -69,8 +71,9 @@ namespace Yapper
 
         public static ISelectBuilder<T> Select<T>()
         {
+            SelectBuilder<T> builder = new SelectBuilder<T>(Dialect);
 
-            throw new NotImplementedException();
+            return builder;
         }
 
         #endregion

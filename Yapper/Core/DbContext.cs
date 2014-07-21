@@ -12,6 +12,9 @@ namespace Yapper.Core
     /// <summary>
     /// A database context class for Dapper (https://github.com/SamSaffron/dapper-dot-net), based on http://blog.gauffin.org/2013/01/ado-net-the-right-way/#.UpWLPMSkrd2
     /// </summary>
+    /// <remarks>
+    /// https://github.com/wcabus/DapperContext
+    /// </remarks>
     sealed class DbContext : IContext
     {
         #region Members
@@ -82,11 +85,11 @@ namespace Yapper.Core
 
                 if (wasClosed)
                 {
-                    unit = new DbUnitOfWork(transaction, RemoveTransactionAndCloseConnection, RemoveTransactionAndCloseConnection);
+                    unit = new DbUnitOfWork(transaction, RemoveTransactionAndCloseConnection);
                 }
                 else
                 {
-                    unit = new DbUnitOfWork(transaction, RemoveTransaction, RemoveTransaction);
+                    unit = new DbUnitOfWork(transaction, RemoveTransaction);
                 }
 
                 _rwLock.EnterWriteLock();

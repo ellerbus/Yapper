@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Augment">
@@ -50,9 +52,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Builders\InsertBuilder.cs" />
     <Compile Include="Builders\DeleteBuilder.cs" />
     <Compile Include="Builders\ExpressionBuilder.cs" />
+    <Compile Include="Builders\SelectBuilder.cs" />
     <Compile Include="Builders\SqlBuilder.cs" />
+    <Compile Include="Builders\UpdateBuilder.cs" />
     <Compile Include="Dialects\DialectCollection.cs" />
     <Compile Include="Dialects\ISqlDialect.cs" />
     <Compile Include="Dialects\SqlCeDialect.cs" />

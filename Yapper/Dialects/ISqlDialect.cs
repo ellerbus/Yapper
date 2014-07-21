@@ -7,18 +7,7 @@ namespace Yapper.Dialects
     /// </summary>
     public interface ISqlDialect
     {
-        //string QueryString(string selection, string source, string conditions, 
-        //    string order, string grouping, string having);
-
-        //string QueryStringPage(string selection, string source, string conditions, string order,
-        //    int pageSize, int pageNumber);
-
-        //string QueryStringPage(string selection, string source, string conditions, string order,
-        //    int pageSize);
-
-        //string Table(string tableName);
-        //string Field(string tableName, string fieldName);
-
+        string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch);
 
         /// <summary>
         /// Gets the delimiter used on to separate identifiers
@@ -44,6 +33,11 @@ namespace Yapper.Dialects
         /// Gets the parameter value used to identify parameters
         /// </summary>
         string ParameterIdentifier { get; }
+
+        /// <summary>
+        /// Gets the identity value on insert
+        /// </summary>
+        string SelectIdentity { get; }
 
         /// <summary>
         /// 

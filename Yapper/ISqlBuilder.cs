@@ -38,8 +38,8 @@ namespace Yapper
     public interface IUpdateBuilder<T> : ISqlQuery,
         IWhereBuilder<IUpdateWhereAndOrBuilder<T>, T>
     {
-        IUpdateBuilder<T> Set(object set);
-        IUpdateBuilder<T> Set<K, V>(Func<T, K> field, Expression<Func<T, V>> expression);
+        IUpdateBuilder<T> Set(object values);
+        IUpdateBuilder<T> Set<K, V>(Expression<Func<T, K>> field, Expression<Func<T, V>> expression);
     }
 
     public interface IUpdateWhereAndOrBuilder<T> : ISqlQuery,
@@ -54,7 +54,6 @@ namespace Yapper
     public interface IDeleteBuilder<T> : ISqlQuery,
         IWhereBuilder<IDeleteAndOrBuilder<T>, T>
     {
-        ISqlQuery Where(T item);
     }
 
     public interface IDeleteAndOrBuilder<T> : ISqlQuery,
@@ -72,11 +71,11 @@ namespace Yapper
         ISelectPageBuilder<T>
     {
         ISelectBuilder<T> Top(int top);
-        ISelectBuilder<T> Select<K>(Func<T, K> select);
-        ISelectBuilder<T> Max<K>(Func<T, K> max);
-        ISelectBuilder<T> Min<K>(Func<T, K> min);
-        ISelectBuilder<T> Avg<K>(Func<T, K> avg);
-        ISelectBuilder<T> Sum<K>(Func<T, K> sum);
+        ISelectBuilder<T> Select<K>(Expression<Func<T, K>> select);
+        ISelectBuilder<T> Max<K>(Expression<Func<T, K>> max);
+        ISelectBuilder<T> Min<K>(Expression<Func<T, K>> min);
+        ISelectBuilder<T> Avg<K>(Expression<Func<T, K>> avg);
+        ISelectBuilder<T> Sum<K>(Expression<Func<T, K>> sum);
     }
 
     public interface ISelectAndOrOrderByBuilder<T> : ISqlQuery,
@@ -89,15 +88,15 @@ namespace Yapper
     public interface ISelectOrderByBuilder<T> : ISqlQuery,
         ISelectPageBuilder<T>
     {
-        ISelectThenByBuilder<T> OrderBy<K>(Func<T, K> orderby);
-        ISelectThenByBuilder<T> OrderByDescending<K>(Func<T, K> orderby);
+        ISelectThenByBuilder<T> OrderBy<K>(Expression<Func<T, K>> orderby);
+        ISelectThenByBuilder<T> OrderByDescending<K>(Expression<Func<T, K>> orderby);
     }
 
     public interface ISelectThenByBuilder<T> : ISqlQuery,
         ISelectPageBuilder<T>
     {
-        ISelectThenByBuilder<T> ThenBy<K>(Func<T, K> orderby);
-        ISelectThenByBuilder<T> ThenByDescending<K>(Func<T, K> orderby);
+        ISelectThenByBuilder<T> ThenBy<K>(Expression<Func<T, K>> thenby);
+        ISelectThenByBuilder<T> ThenByDescending<K>(Expression<Func<T, K>> thenby);
     }
 
     public interface ISelectPageBuilder<T> : ISqlQuery
