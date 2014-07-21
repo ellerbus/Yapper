@@ -22,5 +22,15 @@ namespace Yapper
         /// Retrieves the underlying <see cref="IDbTransaction"/> instance.
         /// </summary>
         IDbTransaction Transaction { get; }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Commit();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        void Rollback();
     }
 }

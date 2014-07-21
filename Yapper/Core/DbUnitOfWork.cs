@@ -73,7 +73,7 @@ namespace Yapper.Core
         /// SaveChanges will try and commit all statements that have been executed against the database inside this unit of work.
         /// </summary>
         /// <exception cref="InvalidOperationException">Thrown if this unit of work has already been committed or rolled back.</exception>
-        public void SaveChanges()
+        public void Commit()
         {
             Ensure.That(Transaction).IsNotNull();
 
