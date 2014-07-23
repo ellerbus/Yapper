@@ -18,9 +18,9 @@ namespace Yapper.Tests.Building
 
         public enum MyEnum
         {
-            [EnumValueMap("AA")]
+            [EnumMap("AA")]
             A,
-            [EnumValueMap("BB")]
+            [EnumMap("BB")]
             B
         }
         [Table("DO")]
@@ -32,7 +32,7 @@ namespace Yapper.Tests.Building
             public int? NullableID { get; set; }
             [Column]
             public string Name { get; set; }
-            [Column, BooleanValueMap("Y", "N")]
+            [Column]
             public bool YesNo { get; set; }
             [Column]
             public MyEnum Enum { get; set; }
@@ -77,11 +77,7 @@ namespace Yapper.Tests.Building
             var parameters = eb.GetFieldOrProperty("Parameters") as IDictionary<string, object>;
 
             //  assert
-            Assert.AreEqual("([YesNo] = @p0)", sql);
-
-            Assert.IsTrue(parameters.ContainsKey("p0"));
-
-            Assert.AreEqual("Y", parameters["p0"]);
+            Assert.AreEqual("([YesNo] = 1)", sql);
         }
 
         [TestMethod]
@@ -99,11 +95,7 @@ namespace Yapper.Tests.Building
             var parameters = eb.GetFieldOrProperty("Parameters") as IDictionary<string, object>;
 
             //  assert
-            Assert.AreEqual("([YesNo] = @p0)", sql);
-
-            Assert.IsTrue(parameters.ContainsKey("p0"));
-
-            Assert.AreEqual("N", parameters["p0"]);
+            Assert.AreEqual("([YesNo] = 0)", sql);
         }
 
         [TestMethod]

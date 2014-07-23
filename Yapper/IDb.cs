@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Yapper
 {
-    public interface IContext : IDisposable
+    public interface ISession : IDisposable
     {
         IUnitOfWork CreateUnitOfWork(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
 

@@ -25,12 +25,11 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            string sql = "update [COMPLEX_OBJECT] set [YesNo] = @p0";
+            string sql = "update [COMPLEX_OBJECT] set [YesNo] = 0";
 
             //  assert
             Assert.AreEqual(sql, query);
-            Assert.AreEqual(1, parameters.Count);
-            Assert.AreEqual("N", parameters["p0"]);
+            Assert.AreEqual(0, parameters.Count);
         }
 
         [TestMethod]
@@ -69,13 +68,12 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            string sql = "update [COMPLEX_OBJECT] set [YesNo] = @p0 where (([id] > @p1))";
+            string sql = "update [COMPLEX_OBJECT] set [YesNo] = 1 where (([id] > @p0))";
 
             //  assert
             Assert.AreEqual(sql, query);
-            Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual("Y", parameters["p0"]);
-            Assert.AreEqual(0, parameters["p1"]);
+            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(0, parameters["p0"]);
         }
 
         [TestMethod]

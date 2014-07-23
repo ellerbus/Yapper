@@ -14,6 +14,13 @@ namespace Yapper.Tests.Mappers
     [TestClass]
     public class PropertyMapTests
     {
+        public enum Status
+        {
+            [EnumMap("A")]
+            Active,
+            [EnumMap("I")]
+            Inactive,
+        }
         [Table("DO")]
         public class DataObject
         {
@@ -23,8 +30,10 @@ namespace Yapper.Tests.Mappers
             public int? NullableID { get; set; }
             [Column]
             public string Name { get; set; }
-            [Column, BooleanValueMap("Y", "N")]
+            [Column]
             public bool YesNo { get; set; }
+            [Column]
+            public Status Status { get; set; }
             [Column, DatabaseGenerated(DatabaseGeneratedOption.Computed)]
             public string Computed { get; set; }
             [Column]
@@ -41,8 +50,8 @@ namespace Yapper.Tests.Mappers
         [TestMethod]
         public void PropertyMap_Should_UsesValueMap()
         {
-            Assert.IsFalse(GetPropertyMap("ID").UsesValueMap);
-            Assert.IsTrue(GetPropertyMap("YesNo").UsesValueMap);
+            Assert.IsFalse(GetPropertyMap("ID").UsesEnumMap);
+            Assert.IsTrue(GetPropertyMap("Status").UsesEnumMap);
         }
 
         [TestMethod]

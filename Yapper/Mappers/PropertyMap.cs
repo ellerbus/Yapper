@@ -9,12 +9,14 @@ using System.Text;
 using System.Threading.Tasks;
 using EnsureThat;
 using Augment;
+using System.Diagnostics;
 
 namespace Yapper.Mappers
 {
     /// <summary>
     /// Used to map a property to a table.column
     /// </summary>
+    [DebuggerDisplay("Name={Name}")]
     public sealed class PropertyMap
     {
         #region Members
@@ -69,6 +71,7 @@ namespace Yapper.Mappers
             _setter = CreateSetterDelegate(p);
             _getter = CreateGetterDelegate(p);
         }
+
         /// <summary>
         /// 
         /// </summary>
@@ -102,16 +105,7 @@ namespace Yapper.Mappers
 
             if (ObjectProperty.PropertyType.IsEnum)
             {
-                ValueMap = EnumMapCollection.Default.GetMapFor(ObjectProperty.PropertyType);
-            }
-            else if (ObjectProperty.PropertyType == typeof(bool))
-            {
-                BooleanValueMapAttribute map = ObjectProperty.GetCustomAttribute<BooleanValueMapAttribute>(true);
-
-                if (map != null)
-                {
-                    ValueMap = new ValueMap(map);
-                }
+                EnumMap = EnumMapCollection.Default.GetMapFor(ObjectProperty.PropertyType);
             }
         }
 
@@ -220,25 +214,16 @@ namespace Yapper.Mappers
 
         #region Methods
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        public override string ToString()
-        {
-            return GetType().Name + "=" + Name;
-        }
+        ///// <summary>
+        ///// 
+        ///// </summary>
+        ///// <returns></returns>
+        //internal void SetValue(object item, object value)
+        //{
+        //    value = Convert.ChangeType(value, ObjectProperty.PropertyType);
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
-        internal void SetValue(object item, object value)
-        {
-            value = Convert.ChangeType(value, ObjectProperty.PropertyType);
-
-            _setter(item, value);
-        }
+        //    _setter(item, value);
+        //}
 
         /// <summary>
         /// 
@@ -256,9 +241,9 @@ namespace Yapper.Mappers
         /// <returns></returns>
         internal object ConvertToSqlValue(object value)
         {
-            if (UsesValueMap)
+            if (UsesEnumMap)
             {
-                return ValueMap.ToSql(value);
+                return EnumMap.ToSql(value);
             }
 
             if (value == null)
@@ -269,26 +254,26 @@ namespace Yapper.Mappers
             return value;
         }
 
-        /// <summary>
-        /// Translates the value to a SQL value
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        internal object ConvertToClrValue(object value)
-        {
-            if (UsesValueMap)
-            {
-                return ValueMap.ToClr(value);
-            }
+        ///// <summary>
+        ///// Translates the value to a SQL value
+        ///// </summary>
+        ///// <param name="value"></param>
+        ///// <returns></returns>
+        //internal object ConvertToClrValue(object value)
+        //{
+        //    if (UsesEnumMap)
+        //    {
+        //        return EnumMap.ToClr(value);
+        //    }
 
-            if (value != DBNull.Value)
-            {
-                return value;
-            }
+        //    if (value != DBNull.Value)
+        //    {
+        //        return value;
+        //    }
 
-            //  it's DBNull if here
-            return null;
-        }
+        //    //  it's DBNull if here
+        //    return null;
+        //}
 
         #endregion
 
@@ -302,12 +287,12 @@ namespace Yapper.Mappers
         /// <summary>
         /// Used for datatype mapping between SQL and CLR
         /// </summary>
-        public ValueMap ValueMap { get; private set; }
+        public EnumMap EnumMap { get; private set; }
 
         /// <summary>
         /// Is a value map used
         /// </summary>
-        public bool UsesValueMap { get { return ValueMap != null; } }
+        public bool UsesEnumMap { get { return EnumMap != null; } }
 
         /// <summary>
         /// Name=ObjectProperty Name

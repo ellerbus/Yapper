@@ -12,112 +12,67 @@ namespace Yapper.Mappers
     /// <summary>
     /// Contains a map of values to be used for booleans and enums
     /// </summary>
-    public class ValueMap
+    public sealed class EnumMap
     {
         #region Members
 
-        private IDictionary<object, object> _toSqlValues;
-        private IDictionary<object, object> _toClrValues;
+        private IDictionary<object, string> _toSqlValues;
+        private IDictionary<string, object> _toClrValues;
         private Type _enumType;
 
         #endregion
 
         #region Constructors
 
-        private ValueMap()
-        {
-            _toSqlValues = new Dictionary<object, object>(8);
-            _toClrValues = new Dictionary<object, object>(8);
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="map"></param>
-        public ValueMap(BooleanValueMapAttribute map)
-            : this()
-        {
-            Ensure.That(map).IsNotNull();
-
-            MapBoolean(map.TrueValue, map.FalseValue);
-
-            ValidateSqlValueTypes();
-        }
-
         /// <summary>
         /// 
         /// </summary>
         /// <param name="enumType"></param>
-        public ValueMap(Type enumType)
-            : this()
+        public EnumMap(Type enumType)
         {
             Ensure.That(enumType).IsNotNull();
             Ensure.That(enumType.IsEnum).IsTrue();
 
-            MapEnum(enumType);
+            _toSqlValues = new Dictionary<object, string>(8);
+            _toClrValues = new Dictionary<string, object>(8);
 
-            ValidateSqlValueTypes();
+            MapEnum(enumType);
         }
 
         #endregion
 
         #region Methods
 
-        private void MapBoolean(object trueValue, object falseValue)
-        {
-            MapValue(true, trueValue);
-            MapValue(false, falseValue);
-        }
-
         private void MapEnum(Type enumType)
         {
             _enumType = enumType;
+
+            StringBuilder sb = new StringBuilder("case");
 
             foreach (string nm in Enum.GetNames(enumType))
             {
                 MemberInfo enumMember = enumType.GetMember(nm).First();
 
-                EnumValueMapAttribute enumMap = enumMember.GetCustomAttribute<EnumValueMapAttribute>(true);
+                EnumMapAttribute enumMap = enumMember.GetCustomAttribute<EnumMapAttribute>(true);
 
-                object value = Enum.Parse(enumType, nm);
+                UsesMap |= enumMap != null;
 
-                if (enumMap == null)
-                {
-                    MapValue(value, (int)value);
-                }
-                else
-                {
-                    MapValue(value, enumMap.Value);
-                }
+                object clr = Enum.Parse(enumType, nm);
+
+                string sql = enumMap == null ? ((int)clr).ToString() : enumMap.Value;
+
+                MapValue(clr, sql);
+
+                sb.Append(" when {0} = '").Append(sql).Append("' then ").Append((int)clr);
             }
+
+            FromSql = sb.Append(" else 0 end").ToString();
         }
 
-        private void MapValue(object clr, object sql)
+        private void MapValue(object clr, string sql)
         {
             _toSqlValues.Add(clr, sql);
             _toClrValues.Add(sql, clr);
-        }
-
-        private void ValidateSqlValueTypes()
-        {
-            IList<Type> types = _toClrValues.Keys.Select(x => x.GetType()).ToList();
-
-            if (types.Count > 1)
-            {
-                for (int i = 1; i < types.Count; i++)
-                {
-                    Type a = types[i - 0];
-                    Type b = types[i - 1];
-
-                    if (a != b)
-                    {
-                        throw new InvalidOperationException(
-                            "Invalid Enum Map, Type Mismatch using {0} ({1} != {2})"
-                            .FormatArgs(_enumType.FullName, a.FullName, b.FullName)
-                            );
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -125,7 +80,7 @@ namespace Yapper.Mappers
         /// </summary>
         /// <param name="clr"></param>
         /// <returns></returns>
-        public object ToSql(object clr)
+        public string ToSql(object clr)
         {
             Ensure.That(_toSqlValues.ContainsKey(clr))
                 .WithExtraMessageOf(() => "Enum Map {0} does not have CLR Value {1} (missing SQL)".FormatArgs(_enumType.Name, clr))
@@ -140,7 +95,7 @@ namespace Yapper.Mappers
         /// </summary>
         /// <param name="sql"></param>
         /// <returns></returns>
-        public object ToClr(object sql)
+        public object ToClr(string sql)
         {
             Ensure.That(_toClrValues.ContainsKey(sql))
                 .WithExtraMessageOf(() => "Enum Map {0} does not have SQL Value {1} (missing CLR)".FormatArgs(_enumType.Name, sql))
@@ -158,11 +113,21 @@ namespace Yapper.Mappers
         /// The CLR represented type stored in .NET
         /// </summary>
         public Type FromType { get { return _toClrValues.First().Value.GetType(); } }
+
+        /// <summary>
+        /// The SQL to use to select values from the database
+        /// </summary>
+        public string FromSql { get; private set; }
         
         /// <summary>
         /// The CLR represented type going 'to' the database
         /// </summary>
         public Type ToType { get { return _toSqlValues.First().Value.GetType(); } }
+
+        /// <summary>
+        /// Whether or not this ENUM has a map to a string
+        /// </summary>
+        public bool UsesMap { get; private set; }
 
         #endregion
     }

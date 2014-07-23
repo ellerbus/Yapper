@@ -12,7 +12,7 @@ namespace Yapper.Tests
         [TestMethod]
         public void MsSql_Should_Rollback()
         {
-            using (IContext db = GetDb())
+            using (ISession db = GetDb())
             {
                 using (IUnitOfWork uow = db.CreateUnitOfWork())
                 {
@@ -23,6 +23,6 @@ namespace Yapper.Tests
             }
         }
 
-        private IContext GetDb() { return DB.Open("MsSql"); }
+        private ISession GetDb() { return DB.Open("MsSql"); }
     }
 }

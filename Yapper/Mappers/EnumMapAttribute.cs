@@ -8,16 +8,16 @@ namespace Yapper.Mappers
 {
     /// <summary>
     /// Applied to enum fields to convert related dataobject property values
-    /// being stored in a DB (ie. Status.Active can be "A" or 0)
+    /// being stored in a DB (ie. Status.Active = "A")
     /// </summary>
     [AttributeUsage(AttributeTargets.Field, AllowMultiple = false)]
-    public class EnumValueMapAttribute : Attribute
+    public sealed class EnumMapAttribute : Attribute
     {
         /// <summary>
         /// 
         /// </summary>
         /// <param name="value"></param>
-        public EnumValueMapAttribute(object value)
+        public EnumMapAttribute(string value)
         {
             Value = value;
         }
@@ -25,6 +25,6 @@ namespace Yapper.Mappers
         /// <summary>
         /// 
         /// </summary>
-        public object Value { get; private set; }
+        public string Value { get; private set; }
     }
 }

@@ -67,20 +67,19 @@
     <Compile Include="Dialects\SQLiteDialect.cs" />
     <Compile Include="Dialects\SqlServerDialect.cs" />
     <Compile Include="Core\DbFactory.cs" />
-    <Compile Include="Core\DbContext.cs" />
+    <Compile Include="Core\DbSession.cs" />
     <Compile Include="Core\DbUnitOfWork.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ISqlBuilder.cs" />
     <Compile Include="IDb.cs" />
-    <Compile Include="Mappers\BooleanValueMapAttribute.cs" />
     <Compile Include="Mappers\EnumMapCollection.cs" />
-    <Compile Include="Mappers\EnumValueMapAttribute.cs" />
+    <Compile Include="Mappers\EnumMapAttribute.cs" />
     <Compile Include="Mappers\ObjectMap.cs" />
     <Compile Include="Mappers\ObjectMapCollection.cs" />
     <Compile Include="Mappers\PropertyMap.cs" />
     <Compile Include="Mappers\PropertyMapCollection.cs" />
-    <Compile Include="Mappers\ValueMap.cs" />
+    <Compile Include="Mappers\EnumMap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Sql.cs" />
   </ItemGroup>

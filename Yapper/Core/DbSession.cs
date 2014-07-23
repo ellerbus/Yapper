@@ -15,7 +15,7 @@ namespace Yapper.Core
     /// <remarks>
     /// https://github.com/wcabus/DapperContext
     /// </remarks>
-    sealed class DbContext : IContext
+    sealed class DbSession : ISession
     {
         #region Members
 
@@ -32,7 +32,7 @@ namespace Yapper.Core
         /// <para>Default constructor.</para>
         /// <para>Uses the <paramref name="connectionStringName"/> to instantiate a <see cref="DbFactory"/>. This factory will be used to create connections to a database.</para>
         /// </summary>
-        public DbContext(DbFactory factory)
+        public DbSession(DbFactory factory)
         {
             _connectionFactory = factory;
 

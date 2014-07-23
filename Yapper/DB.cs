@@ -18,7 +18,7 @@ namespace Yapper
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static IContext Open(string name = null)
+        public static ISession Open(string name = null)
         {
             if (name.IsNullOrEmpty())
             {
@@ -33,7 +33,7 @@ namespace Yapper
 
             DbFactory factory = new DbFactory(name);
 
-            return new DbContext(factory);
+            return new DbSession(factory);
         }
 
         /// <summary>

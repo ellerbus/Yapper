@@ -212,9 +212,9 @@ namespace Yapper.Builders
 
             PartialSqlString str = "1";
 
-            if (map.UsesValueMap)
+            if (map.UsesEnumMap)
             {
-                str = AddParameter(map.ValueMap.ToSql(true));
+                str = AddParameter(map.EnumMap.ToSql(true));
             }
 
             return str;
@@ -231,9 +231,9 @@ namespace Yapper.Builders
 
             PartialSqlString str = "0";
 
-            if (map.UsesValueMap)
+            if (map.UsesEnumMap)
             {
-                str = AddParameter(map.ValueMap.ToSql(false));
+                str = AddParameter(map.EnumMap.ToSql(false));
             }
 
             return str;
@@ -247,7 +247,7 @@ namespace Yapper.Builders
         /// <returns></returns>
         private object GetEnumValue(Type enumType, object enumValue)
         {
-            ValueMap vmap = EnumMapCollection.Default.GetMapFor(enumType);
+            EnumMap vmap = EnumMapCollection.Default.GetMapFor(enumType);
 
             object value = Enum.ToObject(enumType, enumValue);
 

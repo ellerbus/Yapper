@@ -20,7 +20,7 @@ namespace Yapper.Mappers
 
         private static readonly object _lock = new object();
 
-        private Dictionary<Type, ValueMap> _maps = new Dictionary<Type, ValueMap>();
+        private Dictionary<Type, EnumMap> _maps = new Dictionary<Type, EnumMap>();
 
         #endregion
 
@@ -40,7 +40,7 @@ namespace Yapper.Mappers
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public ValueMap GetMapFor<T>() where T : class
+        public EnumMap GetMapFor<T>() where T : class
         {
             return GetMapFor(typeof(T));
         }
@@ -50,15 +50,17 @@ namespace Yapper.Mappers
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public ValueMap GetMapFor(Type type)
+        public EnumMap GetMapFor(Type type)
         {
             lock (_lock)
             {
-                ValueMap map = null;
+                EnumMap map = null;
 
                 if (!_maps.TryGetValue(type, out map))
                 {
-                    map = new ValueMap(type);
+                    map = new EnumMap(type);
+
+                    map = map.UsesMap ? map : null;
 
                     _maps.Add(type, map);
                 }

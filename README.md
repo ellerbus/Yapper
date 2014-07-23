@@ -140,10 +140,12 @@ Update,Delete Many Operations (non-CUD Specific)
 ``` csharp
 using (var db = DB.Open())
 {
+	Customer c = new Customer { ID = 999, Name = "Stu" };
+
 	var sql = db.Update<Customer>()
-		.Set(new { UpdatedAt = new DateTime(2000, 1, 1) })
+		.Set(new { c.Name, UpdatedAt = new DateTime(2000, 1, 1) })
 		.Set(x => x.CreatedAt, x => x.CreatedAt.AddDays(7))
-		.Where(x => x.IsPreferred)
+		.Where(new { c.ID })
 		;
 	
 	int rows = db.Execute(sql);

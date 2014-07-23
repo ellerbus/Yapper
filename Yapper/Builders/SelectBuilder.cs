@@ -113,22 +113,27 @@ namespace Yapper.Builders
 
         private void AppendSelect(PropertyMap pm, string sqlFunction = null)
         {
+            SelectClause.AppendIf(SelectClause.Length > 0, ", ");
+
+            string source = Dialect.EscapeIdentifier(pm.SourceName);
+
             if (sqlFunction.IsNullOrEmpty())
             {
-                SelectClause.AppendIf(SelectClause.Length > 0, ", ")
-                    .Append(Dialect.EscapeIdentifier(pm.SourceName))
-                    .Append(" as ")
-                    .Append(Dialect.EscapeIdentifier(pm.Name))
-                    ;
+                if (pm.UsesEnumMap)
+                {
+                    SelectClause.Append(pm.EnumMap.FromSql.FormatArgs(source));
+                }
+                else
+                {
+                    SelectClause.Append(source);
+                }
             }
             else
             {
-                SelectClause.AppendIf(SelectClause.Length > 0, ", ")
-                    .Append(sqlFunction).Append("(").Append(Dialect.EscapeIdentifier(pm.SourceName)).Append(")")
-                    .Append(" as ")
-                    .Append(Dialect.EscapeIdentifier(pm.Name))
-                    ;
+                SelectClause.Append(sqlFunction).Append("(").Append(source).Append(")");
             }
+
+            SelectClause.Append(" as ").Append(Dialect.EscapeIdentifier(pm.Name));
         }
 
         private void AppendOrderBy<TField>(Expression<Func<T, TField>> field, bool clear, bool desc)
@@ -172,9 +177,9 @@ namespace Yapper.Builders
             return this;
         }
 
-        public ISelectBuilder<T> Select<K>(Expression<Func<T, K>> select)
+        public ISelectBuilder<T> Column<K>(Expression<Func<T, K>> column)
         {
-            AppendSelect(select);
+            AppendSelect(column);
 
             return this;
         }
@@ -203,6 +208,22 @@ namespace Yapper.Builders
         public ISelectBuilder<T> Sum<K>(Expression<Func<T, K>> sum)
         {
             AppendSelect(sum, "SUM");
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Count<K>(Expression<Func<T, K>> count)
+        {
+            AppendSelect(count, "COUNT");
+
+            return this;
+        }
+
+        public ISelectBuilder<T> Count()
+        {
+            SelectClause.AppendIf(SelectClause.Length > 0, ", ")
+                .Append("COUNT(1)")
+                ;
 
             return this;
         }

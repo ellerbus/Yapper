@@ -71,11 +71,13 @@ namespace Yapper
         ISelectPageBuilder<T>
     {
         ISelectBuilder<T> Top(int top);
-        ISelectBuilder<T> Select<K>(Expression<Func<T, K>> select);
+        ISelectBuilder<T> Column<K>(Expression<Func<T, K>> select);
         ISelectBuilder<T> Max<K>(Expression<Func<T, K>> max);
         ISelectBuilder<T> Min<K>(Expression<Func<T, K>> min);
         ISelectBuilder<T> Avg<K>(Expression<Func<T, K>> avg);
         ISelectBuilder<T> Sum<K>(Expression<Func<T, K>> sum);
+        ISelectBuilder<T> Count<K>(Expression<Func<T, K>> count);
+        ISelectBuilder<T> Count();
     }
 
     public interface ISelectAndOrOrderByBuilder<T> : ISqlQuery,

@@ -16,6 +16,23 @@ namespace Yapper.Tests.Builders
     public class SelectBuilderTests : BuilderTests
     {
         [TestMethod]
+        public void SelectBuilder_Should_Select_Enum_For_AnsiSql()
+        {
+            //  arrange
+            var b = Sql.Select<ComplexObject>().Column(x => x.Status).Column(x => x.Order);
+
+            //  act
+            var query = b.Query.TrimAndReduceWhitespace();
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            string sql = "select case when [Status] = 'A' then 0 when [Status] = 'I' then 1 else 0 end as [Status], [Order] as [Order] from [COMPLEX_OBJECT]";
+
+            //  assert
+            Assert.AreEqual(sql, query);
+        }
+
+        [TestMethod]
         public void SelectBuilder_Should_Select_All_For_AnsiSql()
         {
             //  arrange
@@ -29,6 +46,27 @@ namespace Yapper.Tests.Builders
             var parameters = b.Parameters as IDictionary<string, object>;
 
             string sql = "select [id] as [IdentityID], [Name] as [Name] from [IDENTITY_OBJECT] where (([id] > @p0))";
+
+            //  assert
+            Assert.AreEqual(sql, query);
+            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(0, parameters["p0"]);
+        }
+
+        [TestMethod]
+        public void SelectBuilder_Should_Select_Count_All_For_AnsiSql()
+        {
+            //  arrange
+            Expression<Func<IdentityObject, bool>> where = x => x.IdentityID > 0;
+
+            var b = Sql.Select<IdentityObject>().Count().Where(where);
+
+            //  act
+            var query = b.Query.TrimAndReduceWhitespace();
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            string sql = "select COUNT(1) from [IDENTITY_OBJECT] where (([id] > @p0))";
 
             //  assert
             Assert.AreEqual(sql, query);
