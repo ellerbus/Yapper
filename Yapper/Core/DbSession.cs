@@ -19,7 +19,6 @@ namespace Yapper.Core
     {
         #region Members
 
-        private IDbConnection _connection;
         private readonly DbFactory _connectionFactory;
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
         private readonly LinkedList<IUnitOfWork> _workItems = new LinkedList<IUnitOfWork>();
@@ -29,9 +28,9 @@ namespace Yapper.Core
         #region Constructors
 
         /// <summary>
-        /// <para>Default constructor.</para>
-        /// <para>Uses the <paramref name="connectionStringName"/> to instantiate a <see cref="DbFactory"/>. This factory will be used to create connections to a database.</para>
+        /// 
         /// </summary>
+        /// <param name="factory"></param>
         public DbSession(DbFactory factory)
         {
             _connectionFactory = factory;
@@ -49,12 +48,12 @@ namespace Yapper.Core
         /// <remarks></remarks>
         private void CreateOrReuseConnection()
         {
-            if (_connection != null)
+            if (Connection != null)
             {
                 return;
             }
 
-            _connection = _connectionFactory.Create();
+            Connection = _connectionFactory.Create();
         }
 
         /// <summary>
@@ -70,18 +69,18 @@ namespace Yapper.Core
             //If we need to open the connection ourselves, we're also in charge of
             //closing it when this transaction commits or rolls back.
             //This will be done by RemoveTransactionAndCloseConnection in that case.
-            bool wasClosed = _connection.State == ConnectionState.Closed;
+            bool wasClosed = Connection.State == ConnectionState.Closed;
 
             if (wasClosed)
             {
-                _connection.Open();
+                Connection.Open();
             }
 
             try
             {
                 IUnitOfWork unit;
 
-                IDbTransaction transaction = _connection.BeginTransaction(isolationLevel);
+                IDbTransaction transaction = Connection.BeginTransaction(isolationLevel);
 
                 if (wasClosed)
                 {
@@ -106,7 +105,7 @@ namespace Yapper.Core
                 //exception is thrown when creating the transaction.
                 if (wasClosed)
                 {
-                    _connection.Close();
+                    Connection.Close();
                 }
 
                 //Rethrow the original transaction
@@ -147,7 +146,7 @@ namespace Yapper.Core
 
             _rwLock.ExitWriteLock();
 
-            _connection.Close();
+            Connection.Close();
         }
 
         /// <summary>
@@ -177,11 +176,11 @@ namespace Yapper.Core
                 _rwLock.ExitUpgradeableReadLock();
             }
 
-            if (_connection != null)
+            if (Connection != null)
             {
-                _connection.Dispose();
+                Connection.Dispose();
 
-                _connection = null;
+                Connection = null;
             }
         }
 
@@ -195,7 +194,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Query<T>(_connection, query.Query, query.Parameters, GetCurrentTransaction());
+            return SqlMapper.Query<T>(Connection, query.Query, query.Parameters, GetCurrentTransaction());
         }
 
         public int Execute(ISqlQuery query)
@@ -204,8 +203,14 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Execute(_connection, query.Query, query.Parameters, GetCurrentTransaction());
+            return SqlMapper.Execute(Connection, query.Query, query.Parameters, GetCurrentTransaction());
         }
+
+        #endregion
+
+        #region Properties
+
+        public IDbConnection Connection { get; private set; }
 
         #endregion
     }

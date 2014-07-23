@@ -15,7 +15,7 @@ namespace Yapper.Builders
     /// <summary>
     /// Used to build SQL Expressions from lambdas
     /// </summary>
-    internal sealed class ExpressionBuilder : ISqlQuery
+    sealed class ExpressionBuilder : ISqlQuery
     {
         #region Members
 

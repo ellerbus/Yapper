@@ -16,7 +16,7 @@ namespace Yapper.Builders
     /// <summary>
     /// Implementation for SelectBuilder
     /// </summary>
-    internal sealed class SelectBuilder<T> : SqlBuilder,
+    sealed class SelectBuilder<T> : SqlBuilder,
         ISelectBuilder<T>,
         ISelectAndOrOrderByBuilder<T>,
         ISelectOrderByBuilder<T>,
@@ -28,7 +28,8 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
+        /// <param name="item"></param>
         public SelectBuilder(ISqlDialect dialect, T item)
             : this(dialect)
         {
@@ -38,7 +39,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
         public SelectBuilder(ISqlDialect dialect)
             : base(dialect, typeof(T))
         {

@@ -15,14 +15,15 @@ namespace Yapper.Builders
     /// <summary>
     /// Implementation for UpdateBuilder
     /// </summary>
-    internal sealed class UpdateBuilder<T> : SqlBuilder, IUpdateBuilder<T>, IUpdateWhereAndOrBuilder<T>
+    sealed class UpdateBuilder<T> : SqlBuilder, IUpdateBuilder<T>, IUpdateWhereAndOrBuilder<T>
     {
         #region Constructors
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
+        /// <param name="item"></param>
         public UpdateBuilder(ISqlDialect dialect, T item)
             : this(dialect)
         {
@@ -33,7 +34,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
         public UpdateBuilder(ISqlDialect dialect)
             : base(dialect, typeof(T))
         {

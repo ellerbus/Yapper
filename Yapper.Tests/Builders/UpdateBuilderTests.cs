@@ -57,7 +57,7 @@ namespace Yapper.Tests.Builders
             //  arrange
             DefaultComplexObject.YesNo = true;
 
-            Expression<Func<ComplexObject, bool>> where = x => x.ID > 0;
+            Expression<Func<ComplexObject, bool>> where = x => x.ID > 0 && x.Status == Status.Active;
 
             var b = Sql.Update<ComplexObject>();
 
@@ -68,12 +68,13 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            string sql = "update [COMPLEX_OBJECT] set [YesNo] = 1 where (([id] > @p0))";
+            string sql = "update [COMPLEX_OBJECT] set [YesNo] = 1 where ((([id] > @p0) and ([Status] = @p1)))";
 
             //  assert
             Assert.AreEqual(sql, query);
-            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(2, parameters.Count);
             Assert.AreEqual(0, parameters["p0"]);
+            Assert.AreEqual("A", parameters["p1"]);
         }
 
         [TestMethod]

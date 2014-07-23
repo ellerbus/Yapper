@@ -10,14 +10,15 @@ namespace Yapper.Builders
     /// <summary>
     /// Implementation for InsertBuilder
     /// </summary>
-    internal sealed class InsertBuilder<T> : SqlBuilder
+    sealed class InsertBuilder<T> : SqlBuilder
     {
         #region Constructors
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
+        /// <param name="item"></param>
         public InsertBuilder(ISqlDialect dialect, T item)
             : this(dialect)
         {
@@ -46,7 +47,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
         public InsertBuilder(ISqlDialect dialect)
             : base(dialect, typeof(T))
         {

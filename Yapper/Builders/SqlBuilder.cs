@@ -17,7 +17,7 @@ namespace Yapper.Builders
     /// <summary>
     /// Base class for building sql statements
     /// </summary>
-    internal abstract class SqlBuilder : ISqlQuery
+    abstract class SqlBuilder : ISqlQuery
     {
         #region Constructors
 
@@ -187,6 +187,7 @@ namespace Yapper.Builders
         /// 
         /// </summary>
         /// <param name="values"></param>
+        /// <param name="primaryKeyOnly"></param>
         protected void AppendWhereAnd(object values, bool primaryKeyOnly = false)
         {
             WhereClause.AppendIf(WhereClause.Length > 0, " and ").Append("(");
@@ -240,7 +241,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="values"></param>
+        /// <param name="where"></param>
         protected void AppendWhereAnd(Expression where)
         {
             WhereClause.AppendIf(WhereClause.Length > 0, " and ").Append("(");
@@ -253,7 +254,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="values"></param>
+        /// <param name="where"></param>
         protected void AppendWhereOr(Expression where)
         {
             WhereClause.AppendIf(WhereClause.Length > 0, " or ").Append("(");

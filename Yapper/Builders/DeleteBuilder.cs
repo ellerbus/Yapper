@@ -9,14 +9,15 @@ namespace Yapper.Builders
     /// <summary>
     /// Implementation for DeleteBuilder
     /// </summary>
-    internal sealed class DeleteBuilder<T> : SqlBuilder, IDeleteBuilder<T>, IDeleteAndOrBuilder<T>
+    sealed class DeleteBuilder<T> : SqlBuilder, IDeleteBuilder<T>, IDeleteAndOrBuilder<T>
     {
         #region Constructors
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
+        /// <param name="item"></param>
         public DeleteBuilder(ISqlDialect dialect, T item)
             : this(dialect)
         {
@@ -26,7 +27,7 @@ namespace Yapper.Builders
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="session"></param>
+        /// <param name="dialect"></param>
         public DeleteBuilder(ISqlDialect dialect)
             : base(dialect, typeof(T))
         {

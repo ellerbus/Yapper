@@ -12,6 +12,18 @@ namespace Yapper.Dialects
     {
         #region ISqlDialect Members
 
+        /// <summary>
+        /// Provides the items used to construct a Select statement given a <see cref="ISqlDialect"/>
+        /// </summary>
+        /// <param name="selection">Select Clause</param>
+        /// <param name="source">From Clause</param>
+        /// <param name="conditions">Where Clause</param>
+        /// <param name="order">Order By Clause</param>
+        /// <param name="grouping">Group By Clause</param>
+        /// <param name="limit">Top Clause</param>
+        /// <param name="offset">Page offset index (zero based)</param>
+        /// <param name="fetch">Page number of records to return</param>
+        /// <returns>A SQL Select statement specific to a given <see cref="ISqlDialect"/></returns>
         public virtual string SelectStatement(string selection, string source, string conditions, string order, string grouping, int limit, int offset, int fetch)
         {
             Ensure.That(limit)
@@ -30,16 +42,34 @@ namespace Yapper.Dialects
                 .FormatArgs(selection, source, conditions, order, grouping);
         }
 
+        /// <summary>
+        /// Gets the delimiter used on to separate identifiers
+        /// </summary>
         public virtual string StatementSeparator { get { return ";"; } }
 
+        /// <summary>
+        /// Gets the delimiter used on to separate identifiers
+        /// </summary>
         public virtual string IdentifierSeparator { get { return "."; } }
 
+        /// <summary>
+        /// Gets the delimiter used on the left hand side to escape an SQL identifier.
+        /// </summary>
         public virtual string LeftDelimiter { get { return "["; } }
 
+        /// <summary>
+        /// Gets the delimiter used on the right hand side to escape an SQL identifier.
+        /// </summary>
         public virtual string RightDelimiter { get { return "]"; } }
 
+        /// <summary>
+        /// Gets the parameter value used to identify parameters
+        /// </summary>
         public virtual string ParameterIdentifier { get { return "@"; } }
 
+        /// <summary>
+        /// Gets the identity value on insert
+        /// </summary>
         public abstract string SelectIdentity { get; }
 
         #endregion
@@ -49,10 +79,8 @@ namespace Yapper.Dialects
         /// <summary>
         /// Escapes the specified SQL using the left and right delimiters.
         /// </summary>
-        /// <param name="dialect"></param>
-        /// <param name="id">The SQL to be escaped.</param>
-        /// <returns>The escaped SQL.</returns>
-        /// <exception cref="ArgumentNullException">Thrown if sql is null.</exception>
+        /// <param name="id">Identifier to be escaped with left/right delimiters</param>
+        /// <returns>Escaped Identifier String</returns>
         public string EscapeIdentifier(string id)
         {
             Ensure.That(id).IsNotNull();
