@@ -194,7 +194,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Query<T>(Connection, query.Query, query.Parameters, GetCurrentTransaction());
+            return SqlMapper.Query<T>(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
         }
 
         public int Execute(ISqlQuery query)
@@ -203,7 +203,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Execute(Connection, query.Query, query.Parameters, GetCurrentTransaction());
+            return SqlMapper.Execute(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
         }
 
         #endregion
