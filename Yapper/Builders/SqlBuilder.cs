@@ -167,6 +167,11 @@ namespace Yapper.Builders
         {
             object sqlvalue = pm.ConvertToSqlValue(value);
 
+            if (sqlvalue == null)
+            {
+                return "null";
+            }
+
             if (sqlvalue.GetType() == typeof(bool))
             {
                 return (bool)sqlvalue ? "1" : "0";

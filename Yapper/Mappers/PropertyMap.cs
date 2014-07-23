@@ -246,11 +246,6 @@ namespace Yapper.Mappers
                 return EnumMap.ToSql(value);
             }
 
-            if (value == null)
-            {
-                return DBNull.Value;
-            }
-
             return value;
         }
 
