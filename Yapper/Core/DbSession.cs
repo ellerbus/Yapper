@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using Yapper.Builders;
 
 namespace Yapper.Core
 {
@@ -195,6 +196,32 @@ namespace Yapper.Core
             //Dapper will open and close the connection for us if necessary.
 
             return SqlMapper.Query<T>(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
+        }
+
+        public SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1)
+        {
+            CreateOrReuseConnection();
+
+            //Dapper will open and close the connection for us if necessary.
+
+            SqlCombiner combiner = new SqlCombiner(Sql.Dialect);
+
+            combiner.Combine(q0, q1);
+
+            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters as object, GetCurrentTransaction());
+        }
+
+        public SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
+        {
+            CreateOrReuseConnection();
+
+            //Dapper will open and close the connection for us if necessary.
+
+            SqlCombiner combiner = new SqlCombiner(Sql.Dialect);
+
+            combiner.Combine(q0, q1, queries);
+
+            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters as object, GetCurrentTransaction());
         }
 
         public int Execute(ISqlQuery query)

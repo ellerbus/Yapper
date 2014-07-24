@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using Dapper;
 
 namespace Yapper
 {
@@ -24,6 +25,23 @@ namespace Yapper
         /// <param name="query">The <see cref="ISqlQuery"/> that builds the underlying SQL statement and parameters.</param>
         /// <returns>A sequence of data of the supplied type</returns>
         IEnumerable<T> Query<T>(ISqlQuery query);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="q0"></param>
+        /// <param name="q1"></param>
+        /// <returns></returns>
+        SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="q0"></param>
+        /// <param name="q1"></param>
+        /// <param name="queries"></param>
+        /// <returns></returns>
+        SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
 
         /// <summary>
         /// Executes a <see cref="ISqlQuery"/> against the Connection object,

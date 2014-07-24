@@ -59,6 +59,7 @@
     <Compile Include="Builders\ExpressionBuilder.cs" />
     <Compile Include="Builders\SelectBuilder.cs" />
     <Compile Include="Builders\SqlBuilder.cs" />
+    <Compile Include="Builders\SqlCombiner.cs" />
     <Compile Include="Builders\UpdateBuilder.cs" />
     <Compile Include="Dialects\DialectCollection.cs" />
     <Compile Include="Dialects\ISqlDialect.cs" />
