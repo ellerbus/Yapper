@@ -22,6 +22,18 @@ namespace Yapper.Tests.Data
 
         public ICollection<Products> Products { get; set; }
     }
+    [Table("Categories")]
+    public class Category
+    {
+        [Column("CategoryID"), Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int ID { get; set; }
+        [Column("CategoryName"), Required]
+        public string Name { get; set; }
+        [Column]
+        public string Description { get; set; }
+        [Column]
+        public byte[] Picture { get; set; }
+    }
     [Table("Products")]
     public class Products
     {

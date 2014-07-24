@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,6 +12,63 @@ namespace Yapper
 {
    static class Extensions
    {
+       public static Type CreateDynamicType(this ExpandoObject expando, int id)
+       {
+           Type baseClassType = typeof(object);
+
+           string dynamicClassName = "D" + id;
+
+           AssemblyName assemblyName = new AssemblyName(dynamicClassName + "Assembly");
+
+           AssemblyBuilder assemblyBuilder = System.Threading.Thread.GetDomain().DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+
+           ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule(dynamicClassName + "Module");
+
+           TypeBuilder typeBuilder = moduleBuilder.DefineType(dynamicClassName, TypeAttributes.Public | TypeAttributes.Class, baseClassType);
+
+           var baseClassObj = Activator.CreateInstance(baseClassType);
+
+           IDictionary<string, object> propertyList = expando as IDictionary<string, object>;
+
+           foreach (KeyValuePair<string, object> prop in propertyList)
+           {
+               string propertyName = prop.Key;
+
+               Type propertyType = prop.Value.GetType();
+
+               FieldBuilder fieldBuilder = typeBuilder.DefineField("_" + propertyName, propertyType, FieldAttributes.Private);
+
+               PropertyBuilder propertyBuilder = typeBuilder.DefineProperty(
+                   propertyName,
+                   System.Reflection.PropertyAttributes.None,
+                   propertyType,
+                   new Type[] { propertyType }
+                   );
+
+               MethodAttributes getSetAttributes = MethodAttributes.Public | MethodAttributes.HideBySig;
+
+               MethodBuilder getPropertyBuilder = typeBuilder.DefineMethod("geter", getSetAttributes, propertyType, null);
+
+               ILGenerator getterIL = getPropertyBuilder.GetILGenerator();
+               getterIL.Emit(OpCodes.Ldarg_0);
+               getterIL.Emit(OpCodes.Ldfld, fieldBuilder);
+               getterIL.Emit(OpCodes.Ret);
+
+               MethodBuilder setPropertyBuilder = typeBuilder.DefineMethod("seter", getSetAttributes, null, new Type[] { propertyType });
+
+               ILGenerator setterIL = setPropertyBuilder.GetILGenerator();
+               setterIL.Emit(OpCodes.Ldarg_0);
+               setterIL.Emit(OpCodes.Ldarg_1);
+               setterIL.Emit(OpCodes.Stfld, fieldBuilder);
+               setterIL.Emit(OpCodes.Ret);
+
+               propertyBuilder.SetGetMethod(getPropertyBuilder);
+               propertyBuilder.SetSetMethod(setPropertyBuilder);
+           }
+
+           return typeBuilder.CreateType();
+       }
+
        /// <summary>
        /// Extension method that turns a dictionary of string and object to an ExpandoObject
        /// </summary>

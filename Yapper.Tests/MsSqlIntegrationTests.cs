@@ -17,11 +17,11 @@ namespace Yapper.Tests
             {
                 using (IUnitOfWork uow = db.CreateUnitOfWork())
                 {
-                    Categories c = new Categories { CategoryName = "abc" };
+                    Category c = new Category { Name = "abc" };
 
-                    ISqlQuery sqlc = Sql.Insert<Categories>(c);
+                    ISqlQuery sqlc = Sql.Insert<Category>(c);
 
-                    c.CategoryID = db.Query<int>(sqlc).First();
+                    db.Execute(sqlc);
                 }
                 using (IUnitOfWork uow = db.CreateUnitOfWork())
                 {

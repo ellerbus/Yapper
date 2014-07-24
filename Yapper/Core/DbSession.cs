@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Dynamic;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -7,6 +8,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Yapper.Builders;
+using System.Reflection.Emit;
+using System.Reflection;
 
 namespace Yapper.Core
 {
@@ -19,6 +22,8 @@ namespace Yapper.Core
     sealed class DbSession : ISession
     {
         #region Members
+
+        private static IDictionary<int, Type> _expandoTypes = new Dictionary<int, Type>();
 
         private readonly DbFactory _connectionFactory;
         private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim();
@@ -230,7 +235,40 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Execute(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
+            return SqlMapper.Execute(Connection, query.Query, CreateObject(query), GetCurrentTransaction());
+        }
+
+        private object CreateObject(ISqlQuery sql)
+        {
+            Type t = null;
+
+            lock (_expandoTypes)
+            {
+                int id = sql.Query.GetHashCode();
+
+                if (_expandoTypes.ContainsKey(id))
+                {
+
+                    t = _expandoTypes[id];
+                }
+                else
+                {
+                    t = sql.Parameters.CreateDynamicType(id);
+
+                    _expandoTypes.Add(id, t);
+                }
+            }
+
+            object data = Activator.CreateInstance(t);
+
+            IDictionary<string,object>values = sql.Parameters as IDictionary<string,object>;
+
+            foreach (PropertyInfo p in data.GetType().GetProperties())
+            {
+                p.SetValue(data, values[p.Name]);
+            }
+
+            return data;
         }
 
         #endregion
