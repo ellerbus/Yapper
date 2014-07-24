@@ -9,11 +9,11 @@ SQL Statements.
 _Highlights_
 
 -	Dapper - lean & mean
--	Flexible storage maps for Enum, and Booleans (in progress)
+-	Flexible storage maps for Enums
 -	Support for Identities (or AutoNumbers)
 -	Support for Composite Primary Keys
 -	Support for Paging (in progress)
--	Support for Strongly Typed Aggregation & Selection (in progress)
+-	Support for Strongly Typed Aggregation & Selection
 
 
 ### SQL Databases Currently Supported
