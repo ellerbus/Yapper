@@ -191,6 +191,6 @@ using (var db = DB.Open())
 	sql = Sql.Select<Customer>().Count();
 	
 	//	fetch first one created
-	DateTime creation = db.Query<int>(sql).FirstOrDefault();
+	DateTime creation = db.Query<DateTime>(sql).FirstOrDefault();
 }
 ```
