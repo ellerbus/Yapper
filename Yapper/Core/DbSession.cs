@@ -41,7 +41,7 @@ namespace Yapper.Core
         {
             _connectionFactory = factory;
 
-            Sql.Dialect = factory.Dialect;
+            Sql = new DbSql(_connectionFactory.Dialect);
         }
 
         #endregion
@@ -209,7 +209,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            SqlCombiner combiner = new SqlCombiner(Sql.Dialect);
+            SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
 
             combiner.Combine(q0, q1);
 
@@ -222,7 +222,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            SqlCombiner combiner = new SqlCombiner(Sql.Dialect);
+            SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
 
             combiner.Combine(q0, q1, queries);
 
@@ -235,10 +235,36 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Execute(Connection, query.Query, CreateObject(query), GetCurrentTransaction());
+            return SqlMapper.Execute(Connection, query.Query, CreateParameterObject(query), GetCurrentTransaction());
         }
 
-        private object CreateObject(ISqlQuery sql)
+        public void Execute(ISqlQuery q0, ISqlQuery q1)
+        {
+            CreateOrReuseConnection();
+
+            //Dapper will open and close the connection for us if necessary.
+
+            SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
+
+            combiner.Combine(q0, q1);
+
+            SqlMapper.Execute(Connection, combiner.Query, CreateParameterObject(combiner), GetCurrentTransaction());
+        }
+
+        public void Execute(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
+        {
+            CreateOrReuseConnection();
+
+            //Dapper will open and close the connection for us if necessary.
+
+            SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
+
+            combiner.Combine(q0, q1, queries);
+
+            SqlMapper.Execute(Connection, combiner.Query, CreateParameterObject(combiner), GetCurrentTransaction());
+        }
+
+        private object CreateParameterObject(ISqlQuery sql)
         {
             Type t = null;
 
@@ -276,6 +302,8 @@ namespace Yapper.Core
         #region Properties
 
         public IDbConnection Connection { get; private set; }
+
+        public IDbSql Sql { get; private set; }
 
         #endregion
     }

@@ -11,15 +11,18 @@ namespace Yapper
     /// <summary>
     /// Starting point for building SQL Statements
     /// </summary>
-    public static class Sql
+    sealed class DbSql : IDbSql
     {
-        #region Defaults
+        #region Constructors
 
         /// <summary>
-        /// Default Dialect used for building SQL Statements (<see cref="ThreadStaticAttribute">ThreadStatic</see>)
+        /// 
         /// </summary>
-        [ThreadStatic]
-        internal static ISqlDialect Dialect = new SqlServer2012Dialect();
+        /// <param name="dialect"></param>
+        public DbSql(ISqlDialect dialect)
+        {
+            Dialect = dialect;
+        }
 
         #endregion
 
@@ -31,7 +34,7 @@ namespace Yapper
         /// <typeparam name="T"></typeparam>
         /// <param name="item">T to be deleted from the database</param>
         /// <returns>An instance of <see cref="ISqlQuery"/></returns>
-        public static ISqlQuery Insert<T>(T item)
+        public  ISqlQuery Insert<T>(T item)
         {
             InsertBuilder<T> builder = new InsertBuilder<T>(Dialect, item);
 
@@ -47,7 +50,7 @@ namespace Yapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IDeleteBuilder<T> Delete<T>()
+        public  IDeleteBuilder<T> Delete<T>()
         {
             IDeleteBuilder<T> builder = new DeleteBuilder<T>(Dialect);
 
@@ -60,7 +63,7 @@ namespace Yapper
         /// <typeparam name="T"></typeparam>
         /// <param name="item">T to be deleted from the database</param>
         /// <returns>An instance of <see cref="ISqlQuery"/></returns>
-        public static ISqlQuery Delete<T>(T item)
+        public  ISqlQuery Delete<T>(T item)
         {
             DeleteBuilder<T> builder = new DeleteBuilder<T>(Dialect, item);
 
@@ -76,7 +79,7 @@ namespace Yapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static IUpdateBuilder<T> Update<T>()
+        public  IUpdateBuilder<T> Update<T>()
         {
             UpdateBuilder<T> builder = new UpdateBuilder<T>(Dialect);
 
@@ -89,7 +92,7 @@ namespace Yapper
         /// <typeparam name="T"></typeparam>
         /// <param name="item">T to be deleted from the database</param>
         /// <returns>An instance of <see cref="ISqlQuery"/></returns>
-        public static ISqlQuery Update<T>(T item)
+        public  ISqlQuery Update<T>(T item)
         {
             IUpdateBuilder<T> builder = new UpdateBuilder<T>(Dialect, item);
 
@@ -105,12 +108,21 @@ namespace Yapper
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>An instance of <see cref="ISelectBuilder{T}"/></returns>
-        public static ISelectBuilder<T> Select<T>()
+        public  ISelectBuilder<T> Select<T>()
         {
             SelectBuilder<T> builder = new SelectBuilder<T>(Dialect);
 
             return builder;
         }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public ISqlDialect Dialect { get; private set; }
 
         #endregion
     }

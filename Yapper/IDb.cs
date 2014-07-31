@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using Dapper;
+using Yapper.Dialects;
 
 namespace Yapper
 {
@@ -11,6 +12,8 @@ namespace Yapper
     /// </summary>
     public interface ISession : IDisposable
     {
+        #region Database
+
         /// <summary>
         /// Creates a unit of work (creates an underlying database transaction).
         /// </summary>
@@ -27,21 +30,38 @@ namespace Yapper
         IEnumerable<T> Query<T>(ISqlQuery query);
 
         /// <summary>
-        /// 
+        /// Execute a command that returns multiple result sets, that can be accessed sequentially 
+        /// via the SqlMapper.GridReader
         /// </summary>
-        /// <param name="q0"></param>
-        /// <param name="q1"></param>
-        /// <returns></returns>
+        /// <param name="q0">The first query</param>
+        /// <param name="q1">The second query</param>
+        /// <returns>A <see cref="SqlMapper.GridReader"/> to access returned result sets</returns>
         SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1);
 
         /// <summary>
-        /// 
+        /// Execute a command that returns multiple result sets, that can be accessed sequentially 
+        /// via the SqlMapper.GridReader
         /// </summary>
-        /// <param name="q0"></param>
-        /// <param name="q1"></param>
-        /// <param name="queries"></param>
-        /// <returns></returns>
+        /// <param name="q0">The first query</param>
+        /// <param name="q1">The second query</param>
+        /// <param name="queries">Variable list of remaining queries</param>
+        /// <returns>A <see cref="SqlMapper.GridReader"/> to access returned result sets</returns>
         SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
+
+        /// <summary>
+        /// Send multiple commands to be executed
+        /// </summary>
+        /// <param name="q0">The first command</param>
+        /// <param name="q1">The second command</param>
+        void Execute(ISqlQuery q0, ISqlQuery q1);
+
+        /// <summary>
+        /// Send multiple commands to be executed
+        /// </summary>
+        /// <param name="q0">The first command</param>
+        /// <param name="q1">The second command</param>
+        /// <param name="queries">Variable list of remaining commands</param>
+        void Execute(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
 
         /// <summary>
         /// Executes a <see cref="ISqlQuery"/> against the Connection object,
@@ -51,10 +71,21 @@ namespace Yapper
         /// <returns>The number of rows affected.</returns>
         int Execute(ISqlQuery query);
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
         /// Retrieves the underlying <see cref="IDbConnection"/> instance.
         /// </summary>
         IDbConnection Connection { get; }
+
+        /// <summary>
+        /// Retrieves a Sql Builder using an assigned <see cref="ISqlDialect"/>
+        /// </summary>
+        IDbSql Sql { get; }
+
+        #endregion
     }
 
     /// <summary>
@@ -77,5 +108,57 @@ namespace Yapper
         /// Rolls back the Unit of Work
         /// </summary>
         void Rollback();
+    }
+
+    /// <summary>
+    /// Represents a SQL Builder to a specified database by wrapping
+    /// a <see cref="ISqlDialect"/> instance.
+    /// </summary>
+    public interface IDbSql
+    {
+        /// <summary>
+        /// Starting point for building an Insert statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item">T to be deleted from the database</param>
+        /// <returns>An instance of <see cref="ISqlQuery"/></returns>
+        ISqlQuery Insert<T>(T item);
+
+        /// <summary>
+        /// Starting point for building a Delete statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IDeleteBuilder<T> Delete<T>();
+
+        /// <summary>
+        /// Starting point for building a Delete statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item">T to be deleted from the database</param>
+        /// <returns>An instance of <see cref="ISqlQuery"/></returns>
+        ISqlQuery Delete<T>(T item);
+
+        /// <summary>
+        /// Starting point for building an Update statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        IUpdateBuilder<T> Update<T>();
+
+        /// <summary>
+        /// Starting point for building an Update statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item">T to be deleted from the database</param>
+        /// <returns>An instance of <see cref="ISqlQuery"/></returns>
+        ISqlQuery Update<T>(T item);
+
+        /// <summary>
+        /// Starting point for building a Select statement
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>An instance of <see cref="ISelectBuilder{T}"/></returns>
+        ISelectBuilder<T> Select<T>();
     }
 }

@@ -57,8 +57,11 @@ public class Customer : IUpdatedAt
 	public CustomerTypes CustomerType { get; set; }
 	
 	//	stored in database but not read from database
-	[Column("preferred"),BooleanValueMap("Y", "N"),MaxLength(1)]
+	[Column("preferred")]
 	public bool IsPreferred { get { return CustomerType == CustomerTypes.Preferred; } }
+	
+	//	not stored in, or read from database
+	public bool IsNew { get { return ID > 0; } }
 }
 
 public enum CustomerTypes
@@ -82,13 +85,14 @@ public enum CustomerTypes
 }
 ```
 
-Configuration - The Dialect is derived from the provider invariant name, but like the 
-example below can be overriden.
+Configuration - The default Dialect can be overridden, or mapped to a provider invariant name.
 
 ``` csharp
 
 Sql.Dialect = new SqlServer2012Dialect();
 Sql.Dialect = new SqlServer2008Dialect();
+
+DB.MapDialect("System.Data.SqlClient", new SqlServer2012Dialect());
 
 ```
 
@@ -101,7 +105,6 @@ using (var db = DB.Open())
 
 	using (var trans = db.CreateUnitOfWork())
 	{
-
 		var sql = Sql.Insert(c);
 		
 		c.ID = db.Query<int>(sql);
@@ -192,5 +195,25 @@ using (var db = DB.Open())
 	
 	//	fetch first one created
 	DateTime creation = db.Query<DateTime>(sql).FirstOrDefault();
+}
+```
+
+Optional SQL Building - if you have two connections to two different database
+providers you can optionally invoke the builders by using the Sql property
+of the desired database session.
+
+``` csharp
+using (var dbSQLite = DB.Open("SQLite"))
+{
+	var sql = dbSQLite.Sql.Select<Customer>().Top(1);
+	
+	Customer c = dbSQLite.Query<Customer>().FirstOrDefault();
+
+	using (var dbSqlServer = DB.Open("SqlServer"))
+	{
+		var insertSql = dbSqlServer.Sql.Insert<Customer>(c);
+		
+		dbSqlServer.Insert<Customer>(insertSql);
+	}
 }
 ```
