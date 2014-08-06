@@ -27,7 +27,7 @@ namespace Yapper.Builders
             IList<PropertyMap> properties = ObjectMap.Properties.Where(x => x.IsInsertable).ToList();
 
             IList<string> fields = properties.Select(x => Dialect.EscapeIdentifier(x.SourceName)).ToList();
-            IList<string> parms = properties.Select(x => AppendParameter(x, x.GetValue(item))).ToList();
+            IList<string> parms = properties.Select(x => AppendParameter(x, x.Name, x.GetValue(item))).ToList();
 
             InsertClause.Append(" (")
                 .Append(fields.Join(", "))

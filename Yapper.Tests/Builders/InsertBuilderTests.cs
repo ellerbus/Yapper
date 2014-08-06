@@ -27,12 +27,12 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "insert into [IDENTITY_OBJECT] ([Name]) values (@p0);select SCOPE_IDENTITY()";
+            var sql = "insert into [IDENTITY_OBJECT] ([Name]) values (@Name);select SCOPE_IDENTITY()";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(1, parameters.Count);
-            Assert.AreEqual(DefaultIdentityObject.Name, parameters["p0"]);
+            Assert.AreEqual(DefaultIdentityObject.Name, parameters["Name"]);
         }
 
         [TestMethod]
@@ -48,12 +48,12 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "insert into \"IDENTITY_OBJECT\" (\"Name\") values (@p0);select @@IDENTITY";
+            var sql = "insert into \"IDENTITY_OBJECT\" (\"Name\") values (@Name);select @@IDENTITY";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(1, parameters.Count);
-            Assert.AreEqual(DefaultIdentityObject.Name, parameters["p0"]);
+            Assert.AreEqual(DefaultIdentityObject.Name, parameters["Name"]);
         }
 
         [TestMethod]
@@ -69,12 +69,12 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "insert into \"IDENTITY_OBJECT\" (\"Name\") values (@p0);select last_insert_rowid()";
+            var sql = "insert into \"IDENTITY_OBJECT\" (\"Name\") values (@Name);select last_insert_rowid()";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(1, parameters.Count);
-            Assert.AreEqual(DefaultIdentityObject.Name, parameters["p0"]);
+            Assert.AreEqual(DefaultIdentityObject.Name, parameters["Name"]);
         }
 
         [TestMethod]
@@ -88,14 +88,14 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "insert into [COMPOSITE_KEY_OBJECT] ([parent_id], [this_id], [Name]) values (@p0, @p1, @p2)"                ;
+            var sql = "insert into [COMPOSITE_KEY_OBJECT] ([parent_id], [this_id], [Name]) values (@ParentID, @ThisID, @Name)"                ;
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(3, parameters.Count);
-            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["p0"]);
-            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["p1"]);
-            Assert.AreEqual(DefaultCompositeKeyObject.Name, parameters["p2"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["ParentID"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["ThisID"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.Name, parameters["Name"]);
         }
     }
 }

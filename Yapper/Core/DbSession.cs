@@ -276,7 +276,6 @@ namespace Yapper.Core
 
                 if (_expandoTypes.ContainsKey(id))
                 {
-
                     t = _expandoTypes[id];
                 }
                 else

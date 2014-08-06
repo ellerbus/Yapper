@@ -63,13 +63,13 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([parent_id] = @p0 and [this_id] = @p1)";
+            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([parent_id] = @ParentID and [this_id] = @ThisID)";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["p0"]);
-            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["p1"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.ParentID, parameters["ParentID"]);
+            Assert.AreEqual(DefaultCompositeKeyObject.ThisID, parameters["ThisID"]);
         }
 
         [TestMethod]
@@ -85,12 +85,12 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [IDENTITY_OBJECT] where ([id] = @p0)";
+            var sql = "delete from [IDENTITY_OBJECT] where ([id] = @IdentityID)";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(1, parameters.Count);
-            Assert.AreEqual(123, parameters["p0"]);
+            Assert.AreEqual(123, parameters["IdentityID"]);
         }
 
         [TestMethod]
@@ -106,13 +106,13 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([Name] = @p0) or ([parent_id] = @p1)";
+            var sql = "delete from [COMPOSITE_KEY_OBJECT] where ([Name] = @Name) or ([parent_id] = @ParentID)";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual("abc", parameters["p0"]);
-            Assert.AreEqual(123, parameters["p1"]);
+            Assert.AreEqual("abc", parameters["Name"]);
+            Assert.AreEqual(123, parameters["ParentID"]);
         }
     }
 }

@@ -235,7 +235,7 @@ namespace Yapper.Builders
                     sb.AppendIf(sb.Length > 0, " and ")
                         .Append(Dialect.EscapeIdentifier(pm.SourceName))
                         .Append(" = ")
-                        .Append(AppendParameter(pm, p.GetValue(values)))
+                        .Append(AppendParameter(pm, p.Name, p.GetValue(values)))
                         ;
                 }
             }

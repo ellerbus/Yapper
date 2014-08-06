@@ -64,7 +64,7 @@ namespace Yapper.Builders
                     SetClause.AppendIf(SetClause.Length > 0, " ,")
                         .Append(Dialect.EscapeIdentifier(pm.SourceName))
                         .Append(" = ")
-                        .Append(AppendParameter(pm, p.GetValue(values)))
+                        .Append(AppendParameter(pm, p.Name, p.GetValue(values)))
                         ;
                 }
             }

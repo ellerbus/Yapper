@@ -90,13 +90,13 @@ namespace Yapper.Tests.Builders
 
             var parameters = b.Parameters as IDictionary<string, object>;
 
-            string sql = "update [IDENTITY_OBJECT] set [Name] = @p0 where ([id] = @p1)";
+            string sql = "update [IDENTITY_OBJECT] set [Name] = @Name where ([id] = @IdentityID)";
 
             //  assert
             Assert.AreEqual(sql, query);
             Assert.AreEqual(2, parameters.Count);
-            Assert.AreEqual("abc", parameters["p0"]);
-            Assert.AreEqual(123, parameters["p1"]);
+            Assert.AreEqual("abc", parameters["Name"]);
+            Assert.AreEqual(123, parameters["IdentityID"]);
         }
     }
 }
