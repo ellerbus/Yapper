@@ -9,7 +9,13 @@
     <projectUrl>https://github.com/ellerbus/Yapper</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>beta</releaseNotes>
     <copyright>Copyright 2014</copyright>
+    <tags>orm sql micro-orm</tags>
+    <releaseNotes>beta</releaseNotes>
+    <summary>
+      Yep Another Wrapper for Dapper. This wrapper provides a simple
+      Unit of Work pattern for isolating transactional business rules, 
+      and encourages strongly typed SQL by using custom dialect builders.
+    </summary>
   </metadata>
 </package>

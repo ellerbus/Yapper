@@ -41,6 +41,8 @@ namespace Yapper.Core
         {
             _connectionFactory = factory;
 
+            Yapper.Sql.Dialect = factory.Dialect;
+
             Sql = new DbSql(_connectionFactory.Dialect);
         }
 
@@ -238,7 +240,7 @@ namespace Yapper.Core
             return SqlMapper.Execute(Connection, query.Query, CreateParameterObject(query), GetCurrentTransaction());
         }
 
-        public void Execute(ISqlQuery q0, ISqlQuery q1)
+        public void ExecuteMany(ISqlQuery q0, ISqlQuery q1)
         {
             CreateOrReuseConnection();
 
@@ -251,7 +253,7 @@ namespace Yapper.Core
             SqlMapper.Execute(Connection, combiner.Query, CreateParameterObject(combiner), GetCurrentTransaction());
         }
 
-        public void Execute(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
+        public void ExecuteMany(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
         {
             CreateOrReuseConnection();
 

@@ -53,7 +53,7 @@ namespace Yapper
         /// </summary>
         /// <param name="q0">The first command</param>
         /// <param name="q1">The second command</param>
-        void Execute(ISqlQuery q0, ISqlQuery q1);
+        void ExecuteMany(ISqlQuery q0, ISqlQuery q1);
 
         /// <summary>
         /// Send multiple commands to be executed
@@ -61,7 +61,7 @@ namespace Yapper
         /// <param name="q0">The first command</param>
         /// <param name="q1">The second command</param>
         /// <param name="queries">Variable list of remaining commands</param>
-        void Execute(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
+        void ExecuteMany(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
 
         /// <summary>
         /// Executes a <see cref="ISqlQuery"/> against the Connection object,
