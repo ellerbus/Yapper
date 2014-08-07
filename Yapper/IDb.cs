@@ -71,6 +71,15 @@ namespace Yapper
         /// <returns>The number of rows affected.</returns>
         int Execute(ISqlQuery query);
 
+        /// <summary>
+        /// Executes a <see cref="ISqlQuery"/> against the Connection object,
+        /// and returns the number of rows affected.
+        /// </summary>
+        /// <param name="query">The SQL statement to execute.</param>
+        /// <param name="manyObjects">The objects to execute the SQL on</param>
+        /// <returns>The number of rows affected.</returns>
+        int ExecuteMany(string query, object manyObjects);
+
         #endregion
 
         #region Properties
