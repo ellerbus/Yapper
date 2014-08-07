@@ -205,7 +205,7 @@ namespace Yapper.Core
             return SqlMapper.Query<T>(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
         }
 
-        public SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1)
+        public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1)
         {
             CreateOrReuseConnection();
 
@@ -218,7 +218,7 @@ namespace Yapper.Core
             return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters as object, GetCurrentTransaction());
         }
 
-        public SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
+        public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
         {
             CreateOrReuseConnection();
 
@@ -240,7 +240,16 @@ namespace Yapper.Core
             return SqlMapper.Execute(Connection, query.Query, CreateParameterObject(query), GetCurrentTransaction());
         }
 
-        public void ExecuteMany(ISqlQuery q0, ISqlQuery q1)
+        public int ExecuteMany(string query, object manyObjects)
+        {
+            CreateOrReuseConnection();
+
+            //Dapper will open and close the connection for us if necessary.
+
+            return SqlMapper.Execute(Connection, query, manyObjects, GetCurrentTransaction());
+        }
+
+        public void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1)
         {
             CreateOrReuseConnection();
 
@@ -253,7 +262,7 @@ namespace Yapper.Core
             SqlMapper.Execute(Connection, combiner.Query, CreateParameterObject(combiner), GetCurrentTransaction());
         }
 
-        public void ExecuteMany(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
+        public void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
         {
             CreateOrReuseConnection();
 

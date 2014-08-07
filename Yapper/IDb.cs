@@ -36,7 +36,7 @@ namespace Yapper
         /// <param name="q0">The first query</param>
         /// <param name="q1">The second query</param>
         /// <returns>A <see cref="SqlMapper.GridReader"/> to access returned result sets</returns>
-        SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1);
+        SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1);
 
         /// <summary>
         /// Execute a command that returns multiple result sets, that can be accessed sequentially 
@@ -46,14 +46,14 @@ namespace Yapper
         /// <param name="q1">The second query</param>
         /// <param name="queries">Variable list of remaining queries</param>
         /// <returns>A <see cref="SqlMapper.GridReader"/> to access returned result sets</returns>
-        SqlMapper.GridReader Query(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
+        SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
 
         /// <summary>
         /// Send multiple commands to be executed
         /// </summary>
         /// <param name="q0">The first command</param>
         /// <param name="q1">The second command</param>
-        void ExecuteMany(ISqlQuery q0, ISqlQuery q1);
+        void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1);
 
         /// <summary>
         /// Send multiple commands to be executed
@@ -61,7 +61,7 @@ namespace Yapper
         /// <param name="q0">The first command</param>
         /// <param name="q1">The second command</param>
         /// <param name="queries">Variable list of remaining commands</param>
-        void ExecuteMany(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
+        void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries);
 
         /// <summary>
         /// Executes a <see cref="ISqlQuery"/> against the Connection object,

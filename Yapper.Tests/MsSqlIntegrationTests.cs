@@ -28,7 +28,7 @@ namespace Yapper.Tests
                     ISqlQuery sqlc = Sql.Select<Categories>().Top(1).Where(x => x.CategoryID == 1);
                     ISqlQuery sqlp = Sql.Select<Products>().Top(1).Where(x => x.CategoryID == 1);
 
-                    using (var r = db.Query(sqlc, sqlp))
+                    using (var r = db.QueryMultiple(sqlc, sqlp))
                     {
                         Categories c = r.Read<Categories>().FirstOrDefault();
 
