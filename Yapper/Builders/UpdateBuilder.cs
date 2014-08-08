@@ -49,6 +49,11 @@ namespace Yapper.Builders
         {
             foreach (PropertyInfo p in values.GetType().GetProperties())
             {
+                if (!ObjectMap.Properties.Contains(p.Name))
+                {
+                    continue;
+                }
+
                 PropertyMap pm = ObjectMap.Properties[p.Name];
 
                 bool add = true;
