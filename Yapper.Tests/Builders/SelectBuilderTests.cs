@@ -126,7 +126,7 @@ namespace Yapper.Tests.Builders
         }
 
         [TestMethod]
-        public void SelectBuilder_Should_Select_Page_For_MsSql2008()
+        public void SelectBuilder_Should_Select_Page_1_For_MsSql2008()
         {
             //  arrange
             SetDialect(new SqlServer2008Dialect());
@@ -153,7 +153,34 @@ namespace Yapper.Tests.Builders
         }
 
         [TestMethod]
-        public void SelectBuilder_Should_Select_Page_For_MsSql2012()
+        public void SelectBuilder_Should_Select_Page_2_For_MsSql2008()
+        {
+            //  arrange
+            SetDialect(new SqlServer2008Dialect());
+
+            Expression<Func<IdentityObject, bool>> where = x => x.IdentityID > 0;
+
+            var b = Sql.Select<IdentityObject>().Where(where).Page(2, 15);
+
+            //  act
+            var query = b.Query.TrimAndReduceWhitespace();
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            string sql = "select * from" +
+                " (select [id] as [IdentityID], [Name] as [Name], row_number() over (order by [id]) as rownbr" +
+                " from [IDENTITY_OBJECT] where (([id] > @p0))) x" +
+                " where x.rownbr between 16 and 30"
+                ;
+
+            //  assert
+            Assert.AreEqual(sql, query);
+            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(0, parameters["p0"]);
+        }
+
+        [TestMethod]
+        public void SelectBuilder_Should_Select_Page_1_For_MsSql2012()
         {
             //  arrange
             SetDialect(new SqlServer2012Dialect());
@@ -180,11 +207,38 @@ namespace Yapper.Tests.Builders
         }
 
         [TestMethod]
-        public void SelectBuilder_Should_Select_Page_For_SqlCe()
+        public void SelectBuilder_Should_Select_Page_2_For_MsSql2012()
+        {
+            //  arrange
+            SetDialect(new SqlServer2012Dialect());
+
+            Expression<Func<IdentityObject, bool>> where = x => x.IdentityID > 0;
+
+            var b = Sql.Select<IdentityObject>().Where(where).Page(2, 15);
+
+            //  act
+            var query = b.Query.TrimAndReduceWhitespace();
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            string sql = "select [id] as [IdentityID], [Name] as [Name]" +
+                " from [IDENTITY_OBJECT] where (([id] > @p0))" +
+                " order by [id]" +
+                " offset 15 rows fetch next 15 rows only"
+                ;
+
+            //  assert
+            Assert.AreEqual(sql, query);
+            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(0, parameters["p0"]);
+        }
+
+        [TestMethod]
+        public void SelectBuilder_Should_Select_Page_1_For_SqlCe()
         {
             //  arrange
             SetDialect(new SqlCeDialect());
-            
+
             Expression<Func<IdentityObject, bool>> where = x => x.IdentityID > 0;
 
             var b = Sql.Select<IdentityObject>().Where(where).Page(1, 15);
@@ -198,6 +252,33 @@ namespace Yapper.Tests.Builders
                 " from \"IDENTITY_OBJECT\" where ((\"id\" > @p0))" +
                 " order by \"id\"" +
                 " offset 0 rows fetch next 15 rows only"
+                ;
+
+            //  assert
+            Assert.AreEqual(sql, query);
+            Assert.AreEqual(1, parameters.Count);
+            Assert.AreEqual(0, parameters["p0"]);
+        }
+
+        [TestMethod]
+        public void SelectBuilder_Should_Select_Page_2_For_SqlCe()
+        {
+            //  arrange
+            SetDialect(new SqlCeDialect());
+
+            Expression<Func<IdentityObject, bool>> where = x => x.IdentityID > 0;
+
+            var b = Sql.Select<IdentityObject>().Where(where).Page(2, 15);
+
+            //  act
+            var query = b.Query.TrimAndReduceWhitespace();
+
+            var parameters = b.Parameters as IDictionary<string, object>;
+
+            string sql = "select \"id\" as \"IdentityID\", \"Name\" as \"Name\"" +
+                " from \"IDENTITY_OBJECT\" where ((\"id\" > @p0))" +
+                " order by \"id\"" +
+                " offset 15 rows fetch next 15 rows only"
                 ;
 
             //  assert

@@ -29,7 +29,7 @@ namespace Yapper.Dialects
             {
                 //  paging
                 return "select {0} from {1} {2} {3} {4} offset {5} rows fetch next {6} rows only"
-                    .FormatArgs(selection, source, conditions, grouping, order, offset, fetch);
+                    .FormatArgs(selection, source, conditions, grouping, order, offset * fetch, fetch);
             }
 
             return base.SelectStatement(selection, source, conditions, order, grouping, limit, offset, fetch);

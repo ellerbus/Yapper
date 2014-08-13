@@ -31,7 +31,7 @@ namespace Yapper.Dialects
                     .FormatArgs(selection, order, source, conditions);
 
                 return "select * from ({0}) x where x.rownbr between {1} and {2}"
-                    .FormatArgs(innerSql, offset + 1, offset + fetch);
+                    .FormatArgs(innerSql, offset * fetch + 1, (offset + 1) * fetch);
             }
 
             return base.SelectStatement(selection, source, conditions, order, grouping, limit, offset, fetch);

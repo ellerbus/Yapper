@@ -25,7 +25,7 @@ namespace Yapper.Dialects
             {
                 //  paging
                 return "select {0} from {1} {2} {3} {4} limit {5}, {6}"
-                    .FormatArgs(selection, source, conditions, grouping, order, offset, fetch);
+                    .FormatArgs(selection, source, conditions, grouping, order, offset * fetch, fetch);
             }
 
             if (limit > 0)
