@@ -75,6 +75,7 @@
     <Compile Include="Builders\InsertBuilderTests.cs" />
     <Compile Include="Builders\SelectBuilderTests.cs" />
     <Compile Include="Builders\UpdateBuilderTests.cs" />
+    <Compile Include="Cache\CacheManagerTests.cs" />
     <Compile Include="DataObjects\ComplexObject.cs" />
     <Compile Include="DataObjects\CompositeKeyObject.cs" />
     <Compile Include="DataObjects\IdentityObject.cs" />

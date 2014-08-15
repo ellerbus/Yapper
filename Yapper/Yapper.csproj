@@ -48,6 +48,7 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,6 +63,10 @@
     <Compile Include="Builders\SqlBuilder.cs" />
     <Compile Include="Builders\SqlCombiner.cs" />
     <Compile Include="Builders\UpdateBuilder.cs" />
+    <Compile Include="Cache\CacheExpirationMode.cs" />
+    <Compile Include="Cache\CacheKey.cs" />
+    <Compile Include="Cache\CacheManager.cs" />
+    <Compile Include="Cache\CachePolicy.cs" />
     <Compile Include="Dialects\DialectCollection.cs" />
     <Compile Include="Dialects\ISqlDialect.cs" />
     <Compile Include="Dialects\SqlCeDialect.cs" />
@@ -75,6 +80,7 @@
     <Compile Include="Core\DbUnitOfWork.cs" />
     <Compile Include="DB.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="ICache.cs" />
     <Compile Include="ISqlBuilder.cs" />
     <Compile Include="IDb.cs" />
     <Compile Include="Mappers\EnumMapCollection.cs" />
