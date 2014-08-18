@@ -41,6 +41,6 @@ namespace Yapper.Tests
             }
         }
 
-        private ISession GetDb() { return DB.Open("MsSql"); }
+        private ISession GetDb() { return Database.OpenSession("MsSql"); }
     }
 }

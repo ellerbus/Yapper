@@ -78,7 +78,7 @@
     <Compile Include="Core\DbFactory.cs" />
     <Compile Include="Core\DbSession.cs" />
     <Compile Include="Core\DbUnitOfWork.cs" />
-    <Compile Include="DB.cs" />
+    <Compile Include="Database.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="ISqlBuilder.cs" />

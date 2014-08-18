@@ -202,7 +202,7 @@ namespace Yapper.Core
 
             //Dapper will open and close the connection for us if necessary.
 
-            return SqlMapper.Query<T>(Connection, query.Query, query.Parameters as object, GetCurrentTransaction());
+            return SqlMapper.Query<T>(Connection, query.Query, query.Parameters, GetCurrentTransaction());
         }
 
         public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1)
@@ -215,7 +215,7 @@ namespace Yapper.Core
 
             combiner.Combine(q0, q1);
 
-            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters as object, GetCurrentTransaction());
+            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters, GetCurrentTransaction());
         }
 
         public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
@@ -228,7 +228,7 @@ namespace Yapper.Core
 
             combiner.Combine(q0, q1, queries);
 
-            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters as object, GetCurrentTransaction());
+            return SqlMapper.QueryMultiple(Connection, combiner.Query, combiner.Parameters, GetCurrentTransaction());
         }
 
         public int Execute(ISqlQuery query)
