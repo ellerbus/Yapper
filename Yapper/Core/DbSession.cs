@@ -51,28 +51,12 @@ namespace Yapper.Core
         #region Methods
 
         /// <summary>
-        /// Ensures that a connection is ready for querying or creating transactions
-        /// </summary>
-        /// <remarks></remarks>
-        private void CreateOrReuseConnection()
-        {
-            if (Connection != null)
-            {
-                return;
-            }
-
-            Connection = _connectionFactory.Create();
-        }
-
-        /// <summary>
         /// Creates a new <see cref="IUnitOfWork"/>.
         /// </summary>
         /// <param name="isolationLevel">The <see cref="IsolationLevel"/> used for the transaction inside this unit of work. Default value: <see cref="IsolationLevel.ReadCommitted"/></param>
         /// <returns></returns>
         public IUnitOfWork CreateUnitOfWork(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted)
         {
-            CreateOrReuseConnection();
-
             //To create a transaction, our connection needs to be open.
             //If we need to open the connection ourselves, we're also in charge of
             //closing it when this transaction commits or rolls back.
@@ -198,8 +182,6 @@ namespace Yapper.Core
 
         public IEnumerable<T> Query<T>(ISqlQuery query)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             return SqlMapper.Query<T>(Connection, query.Query, query.Parameters, GetCurrentTransaction());
@@ -207,8 +189,6 @@ namespace Yapper.Core
 
         public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
@@ -220,8 +200,6 @@ namespace Yapper.Core
 
         public SqlMapper.GridReader QueryMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
@@ -233,8 +211,6 @@ namespace Yapper.Core
 
         public int Execute(ISqlQuery query)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             return SqlMapper.Execute(Connection, query.Query, CreateParameterObject(query), GetCurrentTransaction());
@@ -242,8 +218,6 @@ namespace Yapper.Core
 
         public int ExecuteMany(string query, object manyObjects)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             return SqlMapper.Execute(Connection, query, manyObjects, GetCurrentTransaction());
@@ -251,8 +225,6 @@ namespace Yapper.Core
 
         public void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
@@ -264,8 +236,6 @@ namespace Yapper.Core
 
         public void ExecuteMultiple(ISqlQuery q0, ISqlQuery q1, params ISqlQuery[] queries)
         {
-            CreateOrReuseConnection();
-
             //Dapper will open and close the connection for us if necessary.
 
             SqlCombiner combiner = new SqlCombiner(_connectionFactory.Dialect);
@@ -297,7 +267,7 @@ namespace Yapper.Core
 
             object data = Activator.CreateInstance(t);
 
-            IDictionary<string,object>values = sql.Parameters as IDictionary<string,object>;
+            IDictionary<string, object> values = sql.Parameters as IDictionary<string, object>;
 
             foreach (PropertyInfo p in data.GetType().GetProperties())
             {
@@ -311,7 +281,20 @@ namespace Yapper.Core
 
         #region Properties
 
-        public IDbConnection Connection { get; private set; }
+        public IDbConnection Connection
+        {
+            get
+            {
+                if (_connection == null)
+                {
+                    _connection = _connectionFactory.Create();
+                }
+
+                return _connection;
+            }
+            private set { _connection = value; }
+        }
+        private IDbConnection _connection;
 
         public IDbSql Sql { get; private set; }
 
