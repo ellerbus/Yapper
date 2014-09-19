@@ -12,7 +12,7 @@ namespace Yapper.Core
     {
         #region Members
 
-        private readonly Dictionary<string, SqlMapper.IMemberMap> members = new Dictionary<string, SqlMapper.IMemberMap>(StringComparer.OrdinalIgnoreCase);
+        private readonly Dictionary<string, SqlMapper.IMemberMap> _members = new Dictionary<string, SqlMapper.IMemberMap>(StringComparer.OrdinalIgnoreCase);
 
         private readonly SqlMapper.ITypeMap _originalMap;
 
@@ -33,7 +33,7 @@ namespace Yapper.Core
 
         public void MapColumn(string columnName, string memberName)
         {
-            members[columnName] = new MemberMap(columnName, Type.GetMember(memberName).Single());
+            _members[columnName] = new MemberMap(columnName, Type.GetMember(memberName).Single());
         }
 
         public ConstructorInfo FindConstructor(string[] names, Type[] types)
@@ -50,7 +50,7 @@ namespace Yapper.Core
         {
             SqlMapper.IMemberMap map = null;
 
-            if (!members.TryGetValue(columnName, out map))
+            if (!_members.TryGetValue(columnName, out map))
             {
                 //  you might want to return null if
                 //  you prefer not to fallback to the

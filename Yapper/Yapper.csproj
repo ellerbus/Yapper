@@ -62,6 +62,7 @@
     <Compile Include="Cache\CachePolicy.cs" />
     <Compile Include="Core\ColumnNameResolver.cs" />
     <Compile Include="Core\DapperMapper.cs" />
+    <Compile Include="Core\MapperHelper.cs" />
     <Compile Include="Core\QueryBuilder.cs" />
     <Compile Include="Core\DatabaseTransaction.cs" />
     <Compile Include="Core\DatabaseSession.cs" />

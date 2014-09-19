@@ -18,9 +18,6 @@ namespace Yapper.Core
     {
         #region Members
 
-        private static readonly IDictionary<Type, string> _tableNameCache = new Dictionary<Type, string>();
-        private static readonly IDictionary<string, string> _columnNameCache = new Dictionary<string, string>();
-        private static readonly IDictionary<Type, IDictionary<string, PropertyInfo>> _propertyCache = new Dictionary<Type, IDictionary<string, PropertyInfo>>();
         private static readonly IDictionary<int, string> _sqlCache = new Dictionary<int, string>();
 
         #endregion
@@ -45,7 +42,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("select * from ");
 
-                sqlb.Append(GetTableName(type)).Append(GetWhere(type, where));
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, where));
 
                 sql = sqlb.ToString();
 
@@ -73,7 +70,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("delete from ");
 
-                sqlb.Append(GetTableName(type)).Append(GetWhere(type, item));
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, item));
 
                 sql = sqlb.ToString();
 
@@ -101,7 +98,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("delete from ");
 
-                sqlb.Append(GetTableName(type)).Append(GetWhere(type, where));
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, where));
 
                 sql = sqlb.ToString();
 
@@ -129,7 +126,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("update ");
 
-                sqlb.Append(GetTableName(type))
+                sqlb.Append(MapperHelper.GetTableName(type))
                     .Append(GetSet(type, item))
                     .Append(GetWhere(type, item));
 
@@ -174,7 +171,7 @@ namespace Yapper.Core
                     }
                 }
 
-                sqlb.Append(GetTableName(type))
+                sqlb.Append(MapperHelper.GetTableName(type))
                     .Append(GetSet(type, set))
                     .Append(GetWhere(type, where));
 
@@ -204,7 +201,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("insert into ");
 
-                sqlb.Append(GetTableName(type)).Append(GetInsert(type, item));
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetInsert(type, item));
 
                 sql = sqlb.ToString();
 
@@ -234,7 +231,7 @@ namespace Yapper.Core
             {
                 StringBuilder sqlb = new StringBuilder("insert into ");
 
-                sqlb.Append(GetTableName(type)).Append(GetInsert(type, item));
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetInsert(type, item));
 
                 sql = sqlb.ToString();
 
@@ -258,37 +255,7 @@ namespace Yapper.Core
 
         #endregion
 
-        #region Helper Methods
-
-        private static string GetTableName(Type type)
-        {
-            string name = null;
-
-            if (!_tableNameCache.TryGetValue(type, out name))
-            {
-                name = new DefaultTableNameResolver().ResolveTableName(type);
-
-                _tableNameCache[type] = name;
-            }
-
-            return name;
-        }
-
-        private static string GetColumnName(PropertyInfo property)
-        {
-            string key = "{0}.{1}".FormatArgs(property.DeclaringType.FullName, property.Name);
-
-            string name = null;
-
-            if (!_columnNameCache.TryGetValue(key, out name))
-            {
-                name = new DefaultColumnNameResolver().ResolveColumnName(property);
-
-                _columnNameCache[key] = name;
-            }
-
-            return name;
-        }
+        #region Helpers
 
         private static string GetInsert(Type type, object item)
         {
@@ -296,7 +263,7 @@ namespace Yapper.Core
 
             StringBuilder sql = new StringBuilder();
 
-            IDictionary<string, PropertyInfo> columns = GetColumnProperties(type);
+            IDictionary<string, PropertyInfo> columns =MapperHelper. GetColumnProperties(type);
 
             PropertyInfo[] properties = null;
 
@@ -314,7 +281,7 @@ namespace Yapper.Core
                     .ToArray();
             }
 
-            string cols = properties.Select(x => GetColumnName(columns[x.Name])).Join(", ");
+            string cols = properties.Select(x => MapperHelper.GetColumnName(columns[x.Name])).Join(", ");
 
             string parms = properties.Select(x => "@{0}".FormatArgs(x.Name)).Join(", ");
 
@@ -331,7 +298,7 @@ namespace Yapper.Core
 
             StringBuilder sql = new StringBuilder();
 
-            IDictionary<string, PropertyInfo> columns = GetColumnProperties(type);
+            IDictionary<string, PropertyInfo> columns = MapperHelper.GetColumnProperties(type);
 
             PropertyInfo[] properties = null;
 
@@ -352,7 +319,7 @@ namespace Yapper.Core
             foreach (PropertyInfo p in properties)
             {
                 sql.AppendIf(sql.Length > 0, ", ")
-                    .Append(GetColumnName(columns[p.Name]))
+                    .Append(MapperHelper.GetColumnName(columns[p.Name]))
                     .AppendFormat(" = @{0}", p.Name);
             }
 
@@ -368,7 +335,7 @@ namespace Yapper.Core
 
             StringBuilder sql = new StringBuilder();
 
-            IDictionary<string, PropertyInfo> columns = GetColumnProperties(type);
+            IDictionary<string, PropertyInfo> columns = MapperHelper.GetColumnProperties(type);
 
             PropertyInfo[] properties = null;
 
@@ -389,38 +356,11 @@ namespace Yapper.Core
             foreach (PropertyInfo p in properties)
             {
                 sql.AppendIf(sql.Length > 0, " and ")
-                    .Append(GetColumnName(columns[p.Name]))
+                    .Append(MapperHelper.GetColumnName(columns[p.Name]))
                     .AppendFormat(" = @{0}", p.Name);
             }
 
             return " where " + sql.ToString();
-        }
-
-        private static IDictionary<string, PropertyInfo> GetColumnProperties(Type type)
-        {
-            IDictionary<string, PropertyInfo> properties = null;
-
-            if (!_propertyCache.TryGetValue(type, out properties))
-            {
-                properties = type.GetProperties()
-                    .Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
-                    .ToDictionary(x => x.Name);
-
-                SqlMapper.ITypeMap originalMap = SqlMapper.GetTypeMap(type);
-
-                CustomTypeMap map = new CustomTypeMap(type, originalMap);
-
-                foreach (var item in properties)
-                {
-                    map.MapColumn(GetColumnName(item.Value), item.Value.Name);
-                }
-                
-                SqlMapper.SetTypeMap(map.Type, map);
-
-                _propertyCache.Add(type, properties);
-            }
-
-            return _propertyCache[type];
         }
 
         #endregion

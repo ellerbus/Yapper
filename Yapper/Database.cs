@@ -1,9 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.Common;
 using System.Linq;
+using System.Reflection;
 using Augment;
+using Dapper;
 using EnsureThat;
 using Yapper.Core;
 
@@ -66,6 +69,15 @@ namespace Yapper
             connection.Open();
 
             return connection;
+        }
+
+        /// <summary>
+        /// Initializes a Type Map (also automatically checked via CRUD operations)
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        public static void InitializeTypeMap<T>()
+        {
+            MapperHelper.InitializeTypeMap(typeof(T));
         }
     }
 }
