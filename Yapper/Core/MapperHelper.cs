@@ -100,6 +100,8 @@ namespace Yapper.Core
                     }
 
                     SqlMapper.SetTypeMap(map.Type, map);
+
+                    _initialized.Add(type);
                 }
             }
         }

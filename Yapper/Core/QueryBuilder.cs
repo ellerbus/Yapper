@@ -40,6 +40,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("select * from ");
 
                 sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, where));
@@ -68,6 +70,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("delete from ");
 
                 sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, item));
@@ -96,6 +100,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("delete from ");
 
                 sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, where));
@@ -124,6 +130,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("update ");
 
                 sqlb.Append(MapperHelper.GetTableName(type))
@@ -157,6 +165,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("update ");
 
                 if (where != null)
@@ -199,6 +209,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("insert into ");
 
                 sqlb.Append(MapperHelper.GetTableName(type)).Append(GetInsert(type, item));
@@ -229,6 +241,8 @@ namespace Yapper.Core
 
             if (!_sqlCache.TryGetValue(key, out sql))
             {
+                MapperHelper.InitializeTypeMap(type);
+
                 StringBuilder sqlb = new StringBuilder("insert into ");
 
                 sqlb.Append(MapperHelper.GetTableName(type)).Append(GetInsert(type, item));
