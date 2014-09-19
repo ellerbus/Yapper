@@ -9,6 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Yapper.Tests", "Yapper.Test
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8456EFAE-6B77-4493-9C13-F887E8AA94BE}"
 	ProjectSection(SolutionItems) = preProject
+		nuget.bat = nuget.bat
 		README.md = README.md
 	EndProjectSection
 EndProject

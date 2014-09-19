@@ -15,7 +15,7 @@
     <summary>
       Yep Another Wrapper for Dapper. This wrapper provides a simple
       Unit of Work pattern for isolating transactional business rules, 
-      simple cache and crud layer.
+      cache and crud layer.
     </summary>
   </metadata>
 </package>

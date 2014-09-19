@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Augment;
+using Dapper;
 using EnsureThat;
 
 namespace Yapper.Core
@@ -404,6 +405,17 @@ namespace Yapper.Core
                 properties = type.GetProperties()
                     .Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
                     .ToDictionary(x => x.Name);
+
+                SqlMapper.ITypeMap originalMap = SqlMapper.GetTypeMap(type);
+
+                CustomTypeMap map = new CustomTypeMap(type, originalMap);
+
+                foreach (var item in properties)
+                {
+                    map.MapColumn(GetColumnName(item.Value), item.Value.Name);
+                }
+                
+                SqlMapper.SetTypeMap(map.Type, map);
 
                 _propertyCache.Add(type, properties);
             }

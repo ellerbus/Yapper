@@ -61,11 +61,11 @@
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Cache\CachePolicy.cs" />
     <Compile Include="Core\ColumnNameResolver.cs" />
+    <Compile Include="Core\DapperMapper.cs" />
     <Compile Include="Core\QueryBuilder.cs" />
     <Compile Include="Core\DatabaseTransaction.cs" />
     <Compile Include="Core\DatabaseSession.cs" />
     <Compile Include="Core\TableNameResolver.cs" />
-    <Compile Include="Core\TypeMerger.cs" />
     <Compile Include="Database.cs" />
     <Compile Include="ICache.cs" />
     <Compile Include="IDatabase.cs" />

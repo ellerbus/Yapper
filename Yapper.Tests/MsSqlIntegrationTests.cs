@@ -51,6 +51,11 @@ namespace Yapper.Tests
                     newid = c.ID;
 
                     sut.Update<Category>(new { Name = "def" }, new { c.ID });
+
+                    Category a = sut.Query<Category>("select * from Categories where CategoryID = @ID", c).First();
+
+                    Assert.AreEqual(c.ID, a.ID);
+                    Assert.AreEqual("def", a.Name);
                 }
 
                 using (var uow = sut.BeginTransaction())
