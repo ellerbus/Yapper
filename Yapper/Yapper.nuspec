@@ -15,7 +15,7 @@
     <summary>
       Yep Another Wrapper for Dapper. This wrapper provides a simple
       Unit of Work pattern for isolating transactional business rules, 
-      and encourages strongly typed SQL by using custom dialect builders.
+      simple cache and crud layer.
     </summary>
   </metadata>
 </package>

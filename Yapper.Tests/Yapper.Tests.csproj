@@ -69,23 +69,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Builders\BuilderTests.cs" />
-    <Compile Include="Builders\DeleteBuilderTests.cs" />
-    <Compile Include="Builders\ExpressionBuilderTests.cs" />
-    <Compile Include="Builders\InsertBuilderTests.cs" />
-    <Compile Include="Builders\SelectBuilderTests.cs" />
-    <Compile Include="Builders\UpdateBuilderTests.cs" />
     <Compile Include="Cache\CacheManagerTests.cs" />
-    <Compile Include="DataObjects\ComplexObject.cs" />
-    <Compile Include="DataObjects\CompositeKeyObject.cs" />
-    <Compile Include="DataObjects\IdentityObject.cs" />
+    <Compile Include="DataObjects\QueryBuilderEntities.cs" />
     <Compile Include="DataObjects\NorthwindEntities.cs" />
-    <Compile Include="Mappers\ObjectMapTests.cs" />
-    <Compile Include="Mappers\PropertyMapTests.cs" />
-    <Compile Include="Mappers\ValueMapTests.cs" />
+    <Compile Include="MsSqlIntegrationTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="MsSqlIntegrationTests.cs" />
-    <Compile Include="StringExtensions.cs" />
+    <Compile Include="QueryBuilderTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Yapper\Yapper.csproj">
@@ -98,11 +89,6 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Data\NorthwindSqlCe4.0.sdf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

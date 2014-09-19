@@ -56,43 +56,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builders\InsertBuilder.cs" />
-    <Compile Include="Builders\DeleteBuilder.cs" />
-    <Compile Include="Builders\ExpressionBuilder.cs" />
-    <Compile Include="Builders\SelectBuilder.cs" />
-    <Compile Include="Builders\SqlBuilder.cs" />
-    <Compile Include="Builders\SqlCombiner.cs" />
-    <Compile Include="Builders\UpdateBuilder.cs" />
     <Compile Include="Cache\CacheExpirationMode.cs" />
     <Compile Include="Cache\CacheKey.cs" />
     <Compile Include="Cache\CacheManager.cs" />
     <Compile Include="Cache\CachePolicy.cs" />
-    <Compile Include="Dialects\DialectCollection.cs" />
-    <Compile Include="Dialects\ISqlDialect.cs" />
-    <Compile Include="Dialects\SqlCeDialect.cs" />
-    <Compile Include="Dialects\SqlDialect.cs" />
-    <Compile Include="Dialects\SqlServer2008Dialect.cs" />
-    <Compile Include="Dialects\SqlServer2012Dialect.cs" />
-    <Compile Include="Dialects\SQLiteDialect.cs" />
-    <Compile Include="Dialects\SqlServerDialect.cs" />
-    <Compile Include="Core\DbFactory.cs" />
-    <Compile Include="Core\DbSession.cs" />
-    <Compile Include="Core\DbUnitOfWork.cs" />
+    <Compile Include="Core\ColumnNameResolver.cs" />
+    <Compile Include="Core\QueryBuilder.cs" />
+    <Compile Include="Core\DatabaseTransaction.cs" />
+    <Compile Include="Core\DatabaseSession.cs" />
+    <Compile Include="Core\TableNameResolver.cs" />
+    <Compile Include="Core\TypeMerger.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="Extensions.cs" />
     <Compile Include="ICache.cs" />
-    <Compile Include="ISqlBuilder.cs" />
-    <Compile Include="IDb.cs" />
-    <Compile Include="Mappers\EnumMapCollection.cs" />
-    <Compile Include="Mappers\EnumMapAttribute.cs" />
-    <Compile Include="Mappers\ObjectMap.cs" />
-    <Compile Include="Mappers\ObjectMapCollection.cs" />
-    <Compile Include="Mappers\PropertyMap.cs" />
-    <Compile Include="Mappers\PropertyMapCollection.cs" />
-    <Compile Include="Mappers\EnumMap.cs" />
+    <Compile Include="IDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Sql.cs" />
-    <Compile Include="Core\DbSql.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

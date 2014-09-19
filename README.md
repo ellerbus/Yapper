@@ -2,34 +2,18 @@
 
 Yep Another Wrapper for [Dapper](https://github.com/StackExchange/dapper-dot-net).  This
 wrapper provides a simple Unit of Work pattern for isolating transactional business rules,
-and encourages _strongly typed SQL_ by using Linq-ish syntax and expressions for building
-SQL Statements.
+a simple caching layer that uses "tags", and a simple CRUD layer for easy repository
+management.
 
 
 _Highlights_
 
 -	Dapper - lean & mean
--	Flexible storage maps for Enums
--	Support for Identities (or AutoNumbers)
+-	Support for identities (does not return the identity but ignores on inserts)
 -	Support for Composite Primary Keys
 -	Support for Paging (in progress)
 -	Support for Strongly Typed Aggregation & Selection
-
-
-### SQL Databases Currently Supported
-
--	Microsoft SQL Server
--	SQL CE
--	SQLite
-
-
-**SQL Databases to be Implemented
--	MySql
--	PostgreSQL
-
-
-Why another one you say?  _Seriously?!_ Dapper is fun to work with and extend to 
-meet the custom needs of a developer, team, or project.
+-	Optional Data Annontations for mapping tables & columns
 
 ### Show me the Code!
 
@@ -42,178 +26,104 @@ public class Customer : IUpdatedAt
 	[Key,Column("customer_id"),DatabaseGenerated(DatabaseGeneratedOption.Identity)]
 	public int ID { get; set; }
 
-	[Column("customer_name"),MaxLength(50)]
-	public int Name { get; set; }
+	[Column("customer_name")]
+	public string Name { get; set; }
 
-	[Column("created_at")]
-	public DateTime CreatedAt { get; set; }
-
-	[Column("updated_at")]
-	public DateTime? UpdatedAt { get; set; }
+	//	calculated by database - so not part of updates
+	[Column("pricing_level"),DatabaseGenerated(DatabaseGeneratedOption.Computed)]
+	public int PricingLevel { get; set; }
 	
-	// uses an ENUM map if value maps are defined (see enum definition below)
-	// otherwise uses an int by default
-	[Column("customer_option"),MaxLength(1)]
-	public CustomerTypes CustomerType { get; set; }
-	
-	//	stored in database but not read from database
-	[Column("preferred")]
-	public bool IsPreferred { get { return CustomerType == CustomerTypes.Preferred; } }
-	
-	//	not stored in, or read from database
+	//	not stored in, or read from database - since we are using annontations
 	public bool IsNew { get { return ID > 0; } }
 }
-
-public enum CustomerTypes
-{
-	[EnumValueMap("X")] None,
-	//	High Rollers
-	[EnumValueMap("P")] Preferred,
-	//	They represent no more than 20 percent of our customer base,
-	//	but make up more than 50 percent of our sales.
-	[EnumValueMap("L")] Loyal,
-	//	They shop our stores frequently, but make their decisions
-	//	based on the size of our markdowns.
-	[EnumValueMap("D")] Discount,
-	//	They do not have buying a particular item at the top of
-	//	their "To Do" list, but come into the store on a whim.
-	[EnumValueMap("I")] Impulse,
-	//	Rather, they want a sense of experience and/or community.
-	[EnumValueMap("W")] Wandering,
-	//	Epic Fan of https://www.facebook.com/pages/EPIC-Comics/203013316384299
-	[EnumValueMap("E")] EpicFan,
-}
 ```
 
-Configuration - The default Dialect can be overridden, or mapped to a provider invariant name.
+Insert,Select,Update,Delete (CRUD) Operations
 
 ``` csharp
-
-Sql.Dialect = new SqlServer2012Dialect();
-Sql.Dialect = new SqlServer2008Dialect();
-
-DB.MapDialect("System.Data.SqlClient", new SqlServer2012Dialect());
-
-```
-
-Insert,Update,Delete Operations (CUD Specific)
-
-``` csharp
-using (var db = DB.Open())
+using (var db = Database.OpenSession())
 {
-	Customer c = new Customer();
+	Customer c = new Customer { Name = "Stu" };
 
-	using (var trans = db.CreateUnitOfWork())
+	db.Insert(c);
+
+	//	example! - dont get hung up with the proper way to pull
+	//	the identity value - demonstrating that its well formed
+	//	insert SQL - so optionally you can create the proper
+	//	insert statement and use that instead
+	c.ID = db.Query<int>("select max(customer_id) from CUSTOMERS");
+
+	c.Name = "Stu";
+
+	db.Update(c);
+
+	//	pulls using the primary key (again annotations are key here)
+	Customer match = db.Select(c);
+
+	if (match != null && match.ID == c.ID)
 	{
-		var sql = Sql.Insert(c);
-		
-		c.ID = db.Query<int>(sql);
-
-		Console.WriteLine("New ID: {0}", c.ID);
-
-		//	oops no validation on the name
-
-		c.Name = "Stu";
-
-		sql = Sql.Update(c);
-		
-		db.Execute(sql);
-	
-		//	must be explicitly called otherwise the 
-		//	dispose method will automatically rollback
-		trans.Commit();
-		
-		//	if not called the dispose will automatically
-		//	rollback
-		//	trans.Rollback();
+		db.Delete(c);
 	}
-	
-	//	eh, we don't need this one
-	sql = Sql.Delete(c);
+}
 
-	if (db.Execute(sql) == 0)
+Insert,Select,Update,Delete (CRUD) Operations w/Anonymous Objects
+
+``` csharp
+using (var db = Database.OpenSession())
+{
+	//	ALL anonymous calls ignore extra properties
+	db.Insert<Customer>(new { Name = "Stu", IsModified = true });
+
+	//	again..example! - not going for proper SQL here
+	int id = db.Query<int>("select max(customer_id) from CUSTOMERS");
+
+	Customer c = db.Select<Customer>(new { ID = id });
+
+	c.Name = "Stu";
+
+	db.Update(new { c.Name }, new { c.ID });
+	//db.Update(new { Name = "Stu" }, new { ID = 99 });
+
+	if (match != null && match.ID == c.ID)
 	{
-		// it never really existed
+		db.Delete<int>(new { c.ID });
+		//db.Delete<int>(new { ID = 99 });
 	}
 }
 ```
 
-Update,Delete Many Operations (non-CUD Specific)
+Basic Query/Execute Operations
 
 ``` csharp
-using (var db = DB.Open())
+using (var db = Database.OpenSession())
 {
-	Customer c = new Customer { ID = 999, Name = "Stu" };
+	//	ALL anonymous calls ignore extra properties
+	DateTime dt = db.Query<DateTime>("select getutcdate()");
+	
+	IList<DateTime> dates = db.Query<DateTime>("select getutcdate() union select dateadd(year, 100, getutcdate())").ToList();
+	//DateTime date = db.Query<DateTime>("select @dt", new { dt = new DateTime(2000, 1, 1) }).First();
 
-	var sql = db.Update<Customer>()
-		.Set(new { c.Name, UpdatedAt = new DateTime(2000, 1, 1) })
-		.Set(x => x.CreatedAt, x => x.CreatedAt.AddDays(7))
-		.Where(new { c.ID })
-		;
-	
-	int rows = db.Execute(sql);
-	
-	sql = db.Delete<Customer>()
-		.Where(x => x.UpdatedAt == new DateTime(2000, 1, 1))
-		;
-		
-	db.Execute(sql);
-}
-```
+	int rows = db.Execute("delete from CUSTOMERS");
+	//int rows = db.Execute("delete from CUSTOMERS where name = @nm", new { nm = "Stu" });
 
-Some Fetching Examples
-
-``` csharp
-using (var db = DB.Open())
-{
-	//	fetch by name (null if not found)
-	var sql = Sql.Select<Customer>().Where(x => x.Name == "Stu");
-	
-	Customer stu = db.Query<Customer>(sql).FirstOrDefault();
-	
-	sql = Sql.Select<Customer>().Top(1).OrderByDescending(x => x.ID);
-	
-	//	fetch newest by identity
-	Customer newest = db.Query<Customer>(sql).FirstOrDefault();
-	
-	sql = Sql.Select<Customer>().Top(10).OrderByDescending(x => x.ID);
-	
-	//	fetch newest 10 by identity
-	IList<Customer> newestList = db.Query<Customer>(sql).ToList();
-	
-	sql = Sql.Select<Customer>().Where(x => x.UpdatedAt == null);
-	
-	//	fetch all those customers that have never been updated
-	IList<Customer> neverUpdatedList = db.Query<Customer>(sql).ToList();
-	
-	sql = Sql.Select<Customer>().Min(x => x.CreatedAt);
-	
-	//	fetch first one created
-	DateTime creation = db.Query<DateTime>(sql).FirstOrDefault();
-	
-	sql = Sql.Select<Customer>().Count();
-	
-	//	fetch first one created
-	DateTime creation = db.Query<DateTime>(sql).FirstOrDefault();
-}
-```
-
-Optional SQL Building - if you have two connections to two different database
-providers you can optionally invoke the builders by using the Sql property
-of the desired database session.
-
-``` csharp
-using (var dbSQLite = DB.Open("SQLite"))
-{
-	var sql = dbSQLite.Sql.Select<Customer>().Top(1);
-	
-	Customer c = dbSQLite.Query<Customer>().FirstOrDefault();
-
-	using (var dbSqlServer = DB.Open("SqlServer"))
+	using (var greader = db.QueryMultiple("select getutcdate(); select 100"))
 	{
-		var insertSql = dbSqlServer.Sql.Insert<Customer>(c);
-		
-		dbSqlServer.Insert<Customer>(insertSql);
+		DateTime date = greader.Read<DateTime>().First();
+		int number = greader.Read<int>().First();
+	}
+}
+```
+
+Unit of Work Operations
+
+``` csharp
+using (var db = Database.OpenSession())
+{
+	using (var trx = db.BeginTransaction())
+	{
+		trx.Commit();
+		//	otherwise on Dispose .Rollback by default
+		//	if .Commit not already called
 	}
 }
 ```

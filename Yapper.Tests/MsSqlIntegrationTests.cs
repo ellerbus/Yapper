@@ -2,45 +2,75 @@
 using System.Linq;
 using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Yapper.Tests.Data;
 using Dapper;
+using Yapper.Tests.Data;
 
 namespace Yapper.Tests
 {
     [TestClass]
     public class MsSqlIntegrationTests
     {
-        [TestMethod]
-        public void MsSql_Should_Rollback()
+        private IDatabaseSession CreateSession()
         {
-            using (ISession db = GetDb())
+            return Database.OpenSession("MSSQL");
+        }
+
+        [TestMethod, ExpectedException(typeof(ArgumentException))]
+        public void IDatabaseSession_Should_Crash_Too_Many_Connection_Strings()
+        {
+            Database.OpenSession();
+        }
+
+        [TestMethod]
+        public void IDatabaseSession_Should_Dispose_Without_Error()
+        {
+            using (var sut = CreateSession())
             {
-                using (IUnitOfWork uow = db.CreateUnitOfWork())
-                {
-                    Category c = new Category { Name = "abc" };
+                var uow = sut.BeginTransaction();
 
-                    ISqlQuery sqlc = Sql.Insert<Category>(c);
-
-                    db.Execute(sqlc);
-                }
-                using (IUnitOfWork uow = db.CreateUnitOfWork())
-                {
-                    ISqlQuery sqlc = Sql.Select<Categories>().Top(1).Where(x => x.CategoryID == 1);
-                    ISqlQuery sqlp = Sql.Select<Products>().Top(1).Where(x => x.CategoryID == 1);
-
-                    using (var r = db.QueryMultiple(sqlc, sqlp))
-                    {
-                        Categories c = r.Read<Categories>().FirstOrDefault();
-
-                        c.Products = r.Read<Products>().ToList();
-                    }
-                }
-                //ISqlQuery sql = Sql.Select<Products>().Top(10);
-
-                //IList<Products> products = db.Query<Products>(sql).ToList();
+                //  stub
+                Assert.IsInstanceOfType(uow, typeof(IDatabaseTransaction));
             }
         }
 
-        private ISession GetDb() { return Database.OpenSession("MsSql"); }
+        [TestMethod]
+        public void IDatabaseSession_Should_Rollback_And_Execute_Properly()
+        {
+            using (var sut = CreateSession())
+            {
+                int newid = 0;
+
+                using (var uow = sut.BeginTransaction())
+                {
+                    Category c = new Category { Name = "abc" };
+
+                    sut.Insert<Category>(c);
+
+                    c.ID = sut.Query<int>("select max(CategoryID) from Categories").First();
+
+                    newid = c.ID;
+
+                    sut.Update<Category>(new { Name = "def" }, new { c.ID });
+                }
+
+                using (var uow = sut.BeginTransaction())
+                {
+                    string sql = "select top 1 * from Categories where CategoryID = @id;" +
+                        "select top 1 * from Products where CategoryID = @id";
+
+                    using (var r = sut.QueryMultiple(sql, new { id = newid }))
+                    {
+                        Categories c = r.Read<Categories>().FirstOrDefault();
+
+                        if (c != null)
+                        {
+                            c.Products = r.Read<Products>().ToList();
+                        }
+
+                        Assert.IsNull(c);
+                    }
+                }
+            }
+        }
     }
 }

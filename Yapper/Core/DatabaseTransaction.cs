@@ -8,37 +8,37 @@ using EnsureThat;
 
 namespace Yapper.Core
 {
-    sealed class DbUnitOfWork : IUnitOfWork
+    sealed class DatabaseTransaction : IDatabaseTransaction
     {
         #region Members
 
-        private readonly Action<DbUnitOfWork> OnCommit;
-        private readonly Action<DbUnitOfWork> OnRollback;
+        private readonly Action<DatabaseTransaction> OnCommit;
+        private readonly Action<DatabaseTransaction> OnRollback;
 
         #endregion
 
         #region Constructors
 
         /// <summary>
-        /// Creates a new <see cref="DbUnitOfWork"/> instance.
+        /// Creates a new <see cref="DatabaseTransaction"/> instance.
         /// </summary>
         /// <param name="transaction">The underlying <see cref="IDbTransaction"/> object used to either commit or roll back the statements that are being performed inside this unit of work.</param>
-        /// <param name="onCommitOrRollback">An <see cref="Action{UnitOfWork}"/> that will be executed when the unit of work is being committed or rolled back.</param>
-        public DbUnitOfWork(IDbTransaction transaction, Action<DbUnitOfWork> onCommitOrRollback)
+        /// <param name="onCommitOrRollback">An <see cref="Action{DatabaseUnitOfWork}"/> that will be executed when the unit of work is being committed or rolled back.</param>
+        public DatabaseTransaction(IDbTransaction transaction, Action<DatabaseTransaction> onCommitOrRollback)
             : this(transaction, onCommitOrRollback, onCommitOrRollback)
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="DbUnitOfWork"/> instance.
+        /// Creates a new <see cref="DatabaseTransaction"/> instance.
         /// </summary>
         /// <param name="transaction">The underlying <see cref="IDbTransaction"/> object used to either commit or roll back the statements that are being performed inside this unit of work.</param>
-        /// <param name="onCommit">An <see cref="Action{UnitOfWork}"/> that will be executed when the unit of work is being committed.</param>
-        /// <param name="onRollback">An <see cref="Action{UnitOfWork}"/> that will be executed when the unit of work is being rolled back.</param>
-        public DbUnitOfWork(IDbTransaction transaction, Action<DbUnitOfWork> onCommit, Action<DbUnitOfWork> onRollback)
+        /// <param name="onCommit">An <see cref="Action{DatabaseUnitOfWork}"/> that will be executed when the unit of work is being committed.</param>
+        /// <param name="onRollback">An <see cref="Action{DatabaseUnitOfWork}"/> that will be executed when the unit of work is being rolled back.</param>
+        public DatabaseTransaction(IDbTransaction transaction, Action<DatabaseTransaction> onCommit, Action<DatabaseTransaction> onRollback)
         {
             Transaction = transaction;
-            
+
             OnCommit = onCommit;
             OnRollback = onRollback;
         }
@@ -53,7 +53,7 @@ namespace Yapper.Core
         /// <exception cref="InvalidOperationException">Thrown if this unit of work has already been committed or rolled back.</exception>
         public void Rollback()
         {
-            Ensure.That(Transaction).IsNotNull();
+            Ensure.That(Transaction, "Transaction").IsNotNull();
 
             try
             {
@@ -75,7 +75,7 @@ namespace Yapper.Core
         /// <exception cref="InvalidOperationException">Thrown if this unit of work has already been committed or rolled back.</exception>
         public void Commit()
         {
-            Ensure.That(Transaction).IsNotNull();
+            Ensure.That(Transaction, "Transaction").IsNotNull();
 
             try
             {
@@ -118,7 +118,7 @@ namespace Yapper.Core
         #region Properties
 
         /// <summary>
-        /// Retrieves the underlying <see cref="IDbTransaction"/> instance.
+        /// Gets a handle to the underlying <see cref="IDbTransaction"/>
         /// </summary>
         public IDbTransaction Transaction { get; private set; }
 

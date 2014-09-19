@@ -33,6 +33,7 @@ namespace Yapper.Tests.Data
         public string Description { get; set; }
         [Column]
         public byte[] Picture { get; set; }
+        public bool IsExtra { get; set; }
     }
     [Table("Products")]
     public class Products

@@ -12,9 +12,11 @@ namespace Yapper.Tests.Cache
         {
             CacheManager sut = new CacheManager();
 
-            var user = new { ID =1,Name="Me" };
+            var user = new { ID = 1, Name = "Me" };
 
-            CacheKey key = new CacheKey("GETUSER-"+user.ID, new[] { "Users", "User-" + user.ID });
+            var tags = new[] { "Users", "User-" + user.ID };
+
+            CacheKey key = new CacheKey("GETUSER-" + user.ID, tags);
 
             CachePolicy cp = new CachePolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(60) };
 
@@ -34,7 +36,9 @@ namespace Yapper.Tests.Cache
 
             var user = new { ID = 2, Name = "Me" };
 
-            CacheKey key = new CacheKey("GETUSER-" + user.ID, new[] { "Users", "User-" + user.ID });
+            var tags = new[] { "Users", "User-" + user.ID };
+
+            CacheKey key = new CacheKey("GETUSER-" + user.ID, tags);
 
             CachePolicy cp = new CachePolicy { AbsoluteExpiration = DateTimeOffset.UtcNow.AddMinutes(60) };
 
