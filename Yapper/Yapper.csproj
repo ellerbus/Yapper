@@ -56,10 +56,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache\CacheExpirationMode.cs" />
-    <Compile Include="Cache\CacheKey.cs" />
-    <Compile Include="Cache\CacheManager.cs" />
-    <Compile Include="Cache\CachePolicy.cs" />
     <Compile Include="Core\ColumnNameResolver.cs" />
     <Compile Include="Core\DapperMapper.cs" />
     <Compile Include="Core\MapperHelper.cs" />
@@ -68,7 +64,6 @@
     <Compile Include="Core\DatabaseSession.cs" />
     <Compile Include="Core\TableNameResolver.cs" />
     <Compile Include="Database.cs" />
-    <Compile Include="ICache.cs" />
     <Compile Include="IDatabase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

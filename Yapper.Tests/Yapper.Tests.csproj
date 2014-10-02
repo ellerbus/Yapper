@@ -69,7 +69,6 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Cache\CacheManagerTests.cs" />
     <Compile Include="DataObjects\QueryBuilderEntities.cs" />
     <Compile Include="DataObjects\NorthwindEntities.cs" />
     <Compile Include="MsSqlIntegrationTests.cs">
