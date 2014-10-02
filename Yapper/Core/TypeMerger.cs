@@ -14,18 +14,37 @@ namespace Yapper.Core
     /// A Utility class used to merge the properties of
     /// heterogenious objects
     /// </summary>
-    
     class TypeMerger
     {
+        #region Members
+
         //assembly/module builders
-        private static AssemblyBuilder asmBuilder = null;
-        private static ModuleBuilder modBuilder = null;
+        private static AssemblyBuilder _assemblyBuilder = null;
+        private static ModuleBuilder _moduleBuilder = null;
 
         //object type cache
-        private static IDictionary<string, Type> anonymousTypes = new Dictionary<string, Type>();
+        private static IDictionary<string, Type> _anonymousTypes = new Dictionary<string, Type>();
 
         //used for thread-safe access to Type Dictionary
-        private static object _syncLock = new object();
+        private static object _lock = new object();
+
+        static TypeMerger()
+        {
+            //create a new dynamic assembly
+            AssemblyName assembly = new AssemblyName
+            {
+                Name = "AnonymousTypeExentions"
+            };
+
+            //get a module builder object
+            _assemblyBuilder = Thread.GetDomain().DefineDynamicAssembly(assembly, AssemblyBuilderAccess.Run);
+
+            _moduleBuilder = _assemblyBuilder.DefineDynamicModule(_assemblyBuilder.GetName().Name, false);
+        }
+
+        #endregion
+
+        #region Static Methods
 
         /// <summary>
         /// Merge two different object instances into a single
@@ -35,46 +54,9 @@ namespace Yapper.Core
         public static object MergeTypes(object values1, object values2)
         {
             //create a name from the names of both Types
-            string name = string.Format("{0}_{1}", values1.GetType(), values2.GetType());
-            string name2 = string.Format("{0}_{1}", values2.GetType(), values1.GetType());
+            string name = string.Format("M_{0}_{1}", values1.GetType(), values2.GetType());
 
-            object newValues = CreateInstance(name, values1, values2);
-
-            if (newValues != null)
-            {
-                return newValues;
-            }
-
-            newValues = CreateInstance(name2, values2, values1);
-
-            if (newValues != null)
-            {
-                return newValues;
-            }
-
-            //lock for thread safe writing
-            lock (_syncLock)
-            {
-                //now that we're inside the lock - check one more time
-                newValues = CreateInstance(name, values1, values2);
-                if (newValues != null)
-                    return newValues;
-
-                //merge list of PropertyDescriptors for both objects
-                PropertyDescriptor[] pdc = GetProperties(values1, values2);
-
-                //make sure static properties are properly initialized
-                InitializeAssembly();
-
-                //create the type definition
-                Type newType = CreateType(name, pdc);
-
-                //add it to the cache
-                anonymousTypes.Add(name, newType);
-
-                //return an instance of the new Type
-                return CreateInstance(name, values1, values2);
-            }
+            return CreateInstance(name, values1, values2);
         }
 
         /// <summary>
@@ -82,41 +64,40 @@ namespace Yapper.Core
         /// </summary>
         private static object CreateInstance(string name, object values1, object values2)
         {
-            object newValues = null;
+            Type mergedType = null;
+
+            lock (_lock)
+            {
+                if (!_anonymousTypes.TryGetValue(name, out mergedType))
+                {
+                    //merge list of PropertyDescriptors for both objects
+                    PropertyDescriptor[] pdc = MergeProperties(values1, values2);
+
+                    //create the type definition
+                    mergedType = CreateMergedType(name, pdc);
+
+                    //add it to the cache
+                    _anonymousTypes.Add(name, mergedType);
+                }
+            }
 
             //merge all values together into an array
             object[] allValues = MergeValues(values1, values2);
 
-            //check to see if type exists
-            if (anonymousTypes.ContainsKey(name))
-            {
-                //get type
-                Type type = anonymousTypes[name];
+            //create a new instance
+            object mergedInstance = Activator.CreateInstance(mergedType, allValues);
 
-                //make sure it isn't null for some reason
-                if (type != null)
-                {
-                    //create a new instance
-                    newValues = Activator.CreateInstance(type, allValues);
-                }
-                else
-                {
-                    //remove null type entry
-                    lock (_syncLock)
-                    {
-                        anonymousTypes.Remove(name);
-                    }
-                }
-            }
-
-            //return values (if any)
-            return newValues;
+            return mergedInstance;
         }
+
+        #endregion
+
+        #region Merge Methods
 
         /// <summary>
         /// Merge PropertyDescriptors for both objects
         /// </summary>
-        private static PropertyDescriptor[] GetProperties(object values1, object values2)
+        private static PropertyDescriptor[] MergeProperties(object values1, object values2)
         {
             //dynamic list to hold merged list of properties
             List<PropertyDescriptor> properties = new List<PropertyDescriptor>();
@@ -144,7 +125,7 @@ namespace Yapper.Core
         /// <summary>
         /// Get the type of each property
         /// </summary>
-        private static Type[] GetTypes(PropertyDescriptor[] pdc)
+        private static Type[] MergePropertyTypes(PropertyDescriptor[] pdc)
         {
             List<Type> types = new List<Type>();
 
@@ -159,8 +140,7 @@ namespace Yapper.Core
         /// <summary>
         /// Merge the values of the two types into an object array
         /// </summary>
-        private static object[] MergeValues(object values1,
-            object values2)
+        private static object[] MergeValues(object values1, object values2)
         {
             PropertyDescriptorCollection pdc1 = TypeDescriptor.GetProperties(values1);
             PropertyDescriptorCollection pdc2 = TypeDescriptor.GetProperties(values2);
@@ -181,41 +161,16 @@ namespace Yapper.Core
         }
 
         /// <summary>
-        /// Initialize static objects
-        /// </summary>
-        private static void InitializeAssembly()
-        {
-            //check to see if we've already instantiated
-            //the static objects
-            if (asmBuilder == null)
-            {
-                //create a new dynamic assembly
-                AssemblyName assembly = new AssemblyName
-                {
-                    Name = "AnonymousTypeExentions"
-                };
-
-                //get the current application domain
-                AppDomain domain = Thread.GetDomain();
-
-                //get a module builder object
-                asmBuilder = domain.DefineDynamicAssembly(assembly, AssemblyBuilderAccess.Run);
-
-                modBuilder = asmBuilder.DefineDynamicModule(asmBuilder.GetName().Name, false);
-            }
-        }
-
-        /// <summary>
         /// Create a new Type definition from the list
         /// of PropertyDescriptors
         /// </summary>
-        private static Type CreateType(string name, PropertyDescriptor[] pdc)
+        private static Type CreateMergedType(string name, PropertyDescriptor[] pdc)
         {
             //create TypeBuilder
             TypeBuilder typeBuilder = CreateTypeBuilder(name);
 
             //get list of types for ctor definition
-            Type[] types = GetTypes(pdc);
+            Type[] types = MergePropertyTypes(pdc);
 
             //create priate fields for use w/in the ctor body and properties
             FieldBuilder[] fields = BuildFields(typeBuilder, pdc);
@@ -236,7 +191,7 @@ namespace Yapper.Core
         private static TypeBuilder CreateTypeBuilder(string typeName)
         {
             //define class attributes
-            TypeBuilder typeBuilder = modBuilder.DefineType(typeName,
+            TypeBuilder typeBuilder = _moduleBuilder.DefineType(typeName,
                         TypeAttributes.Public |
                         TypeAttributes.Class |
                         TypeAttributes.AutoClass |
@@ -323,7 +278,7 @@ namespace Yapper.Core
                 //define 'Get' method only (anonymous types are read-only)
                 MethodBuilder getMethod = typeBuilder.DefineMethod(
                     string.Format("Get_{0}", propertyName),
-                    MethodAttributes.Public | MethodAttributes.SpecialName |                         MethodAttributes.HideBySig,
+                    MethodAttributes.Public | MethodAttributes.SpecialName | MethodAttributes.HideBySig,
                     fields[i].FieldType,
                     Type.EmptyTypes
                     );
@@ -342,5 +297,7 @@ namespace Yapper.Core
                 property.SetGetMethod(getMethod);
             }
         }
+
+        #endregion
     }
 }
