@@ -2,21 +2,48 @@
 using System.Collections.Generic;
 using System.Data;
 using Dapper;
+using UniqueNamespace.Dapper;
 
 namespace Yapper
 {
+    /// <summary>
+    /// 
+    /// </summary>
+    public interface IBuilderResults
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        string Sql { get; }
+        /// <summary>
+        /// 
+        /// </summary>
+        object Parameters { get; }
+    }
+
     /// <summary>
     /// Represents an open connection to a specified database by wrapping
     /// an <see cref="IDbConnection"/> instance.
     /// </summary>
     public interface IDatabaseSession : IDisposable
     {
+        #region Members
+
+        /// <summary>
+        /// Gets a handle to the underlying <see cref="IDbConnection"/>
+        /// </summary>
+        IDbConnection Connection { get; }
+
         /// <summary>
         /// Creates a unit of work (creates an underlying database transaction).
         /// </summary>
         /// <param name="isolationLevel">Specifies the <see cref="IsolationLevel"/> for this transaction.</param>
         /// <returns>A <see cref="IDatabaseTransaction"/></returns>
         IDatabaseTransaction BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+
+        #endregion
+
+        #region Plain Dapper
 
         /// <summary>
         /// 
@@ -43,10 +70,47 @@ namespace Yapper
         /// <returns>Number of records affected</returns>
         int Execute(string sql, object param = null);
 
+        #endregion
+
+        #region Builder Ops
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        IEnumerable<T> Query<T>(SqlBuilder.Template sql);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        SqlMapper.GridReader QueryMultiple(SqlBuilder.Template sql);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        int Execute(SqlBuilder.Template sql);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        int Execute(IBuilderResults r);
+
+        #endregion
+
+        #region CUD Ops
+
         /// <summary>
         /// Inserts a new item w/o all properties assigned
         /// </summary>
-        int Insert<T>(object item);
+        int Insert<T>(object data);
 
         /// <summary>
         /// Inserts a new item using all properties
@@ -76,18 +140,7 @@ namespace Yapper
         /// </summary>
         int Delete<T>(T item);
 
-        /// <summary>
-        /// Gets a item from based on the supplied primary key
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="parm">Object that contains the primary key to search with</param>
-        /// <returns></returns>
-        IEnumerable<T> Select<T>(object parm);
-
-        /// <summary>
-        /// Gets a handle to the underlying <see cref="IDbConnection"/>
-        /// </summary>
-        IDbConnection Connection { get; }
+        #endregion
     }
 
     /// <summary>

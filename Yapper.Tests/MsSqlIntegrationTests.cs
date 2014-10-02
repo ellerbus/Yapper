@@ -39,7 +39,7 @@ namespace Yapper.Tests
             using (var sut = CreateSession())
             {
                 //  Check for "auto"
-                //Database.InitializeTypeMap<Category>();
+                Database.InitializeTypeMap<Category>();
 
                 int newid = 0;
 

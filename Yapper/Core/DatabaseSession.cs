@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dapper;
 using System.Reflection.Emit;
 using System.Reflection;
+using UniqueNamespace.Dapper;
 
 namespace Yapper.Core
 {
@@ -170,7 +171,7 @@ namespace Yapper.Core
 
         #endregion
 
-        #region Dapper
+        #region Dapper Ops
 
         public IEnumerable<T> Query<T>(string sql, object param = null)
         {
@@ -193,78 +194,74 @@ namespace Yapper.Core
             return Connection.Execute(sql: sql, param: param, transaction: GetCurrentTransaction());
         }
 
-        /// <summary>
-        /// Inserts a new item w/o all properties assigned
-        /// </summary>
-        public int Insert<T>(object item)
-        {
-            string sql = QueryBuilder.Insert<T>(item);
+        #endregion
 
-            return Execute(sql, item);
+        #region Builder Ops
+
+        public IEnumerable<T> Query<T>(SqlBuilder.Template sql)
+        {
+            return Query<T>(sql.RawSql, sql.Parameters);
         }
 
-        /// <summary>
-        /// Inserts a new item w/ all properties assigned
-        /// </summary>
+        public SqlMapper.GridReader QueryMultiple(SqlBuilder.Template sql)
+        {
+            return QueryMultiple(sql.RawSql, sql.Parameters);
+        }
+
+        public int Execute(SqlBuilder.Template sql)
+        {
+            return Execute(sql.RawSql, sql.Parameters);
+        }
+
+        public int Execute(IBuilderResults r)
+        {
+            return Execute(r.Sql, r.Parameters);
+        }
+
+        #endregion
+
+        #region CUD Ops
+
+        public int Insert<T>(object data)
+        {
+            IBuilderResults r = QueryBuilder.Insert<T>(data);
+
+            return Execute(r);
+        }
+
         public int Insert<T>(T item)
         {
-            string sql = QueryBuilder.Insert<T>(item);
+            IBuilderResults r = QueryBuilder.Insert<T>(item);
 
-            return Execute(sql, item);
+            return Execute(r);
         }
 
-        /// <summary>
-        /// Updates a new item w/o all properties assigned
-        /// </summary>
         public int Update<T>(object set, object where)
         {
-            string sql = QueryBuilder.Update<T>(set, where);
+            IBuilderResults r = QueryBuilder.Update<T>(set, where);
 
-            DynamicParameters parms = new DynamicParameters(set);
-
-            parms.AddDynamicParams(where);
-
-            return Execute(sql, parms);
+            return Execute(r);
         }
 
-        /// <summary>
-        /// Updates a new item w/ all properties assigned
-        /// </summary>
         public int Update<T>(T item)
         {
-            string sql = QueryBuilder.Update<T>(item);
+            IBuilderResults r = QueryBuilder.Update<T>(item);
 
-            return Execute(sql, item);
+            return Execute(r);
         }
 
-        /// <summary>
-        /// Inserts a new item w/o all properties assigned
-        /// </summary>
         public int Delete<T>(object where)
         {
-            string sql = QueryBuilder.Delete<T>(where);
+            IBuilderResults r = QueryBuilder.Delete<T>(where);
 
-            return Execute(sql, where);
+            return Execute(r);
         }
 
-        /// <summary>
-        /// Inserts a new item w/ all properties assigned
-        /// </summary>
         public int Delete<T>(T item)
         {
-            string sql = QueryBuilder.Delete<T>(item);
+            IBuilderResults r = QueryBuilder.Delete<T>(item);
 
-            return Execute(sql, item);
-        }
-
-        /// <summary>
-        /// Selects an based on parameters
-        /// </summary>
-        public IEnumerable<T> Select<T>(object where)
-        {
-            string sql = QueryBuilder.Select<T>(where);
-
-            return Query<T>(sql, where);
+            return Execute(r);
         }
 
         #endregion

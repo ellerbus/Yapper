@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using UniqueNamespace;
 using Yapper.Core;
 using Yapper.Tests.DataObjects;
 
@@ -19,7 +20,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Insert<SimpleObject>(new SimpleObject());
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -29,7 +30,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Insert<SimpleObject>(new { Name = "ABC" });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -39,7 +40,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Insert<SimpleObject>(new { Name = "ABC", IsModified = false });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -47,7 +48,7 @@ namespace Yapper.Tests
         {
             var expected = "delete from SIMPLE_OBJECTS";
 
-            var sql = QueryBuilder.Delete<SimpleObject>(null);
+            var sql = QueryBuilder.Delete<SimpleObject>();
 
             Assert.AreEqual(expected, sql);
         }
@@ -59,7 +60,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Delete<SimpleObject>(new SimpleObject());
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -69,7 +70,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Delete<ComplexObject>(new ComplexObject());
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -79,7 +80,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Delete<SimpleObject>(new { Name = "ABC" });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -89,7 +90,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Delete<SimpleObject>(new { Name = "ABC", IsModified = false });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -99,7 +100,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Update<SimpleObject>(new { Name = "ABC" }, null);
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -109,7 +110,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Update<SimpleObject>(new SimpleObject());
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -119,7 +120,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Update<ComplexObject>(new ComplexObject());
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
@@ -129,7 +130,7 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Update<ComplexObject>(new { Name = "ABC" }, new { Computed = "DEF" });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod, ExpectedException(typeof(InvalidOperationException))]
@@ -139,45 +140,35 @@ namespace Yapper.Tests
 
             var sql = QueryBuilder.Update<ComplexObject>(new { Name = "ABC" }, new { Name = "DEF" });
 
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, sql.Sql);
         }
 
         [TestMethod]
-        public void QueryBuilder_Should_Select_All()
+        public void QueryBuilder_Should_Get_Select_Template()
         {
-            var expected = "select * from SIMPLE_OBJECTS";
+            var expected = Templates.Selection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
 
-            var sql = QueryBuilder.Select<SimpleObject>(null);
-
-            Assert.AreEqual(expected, sql);
-        }
-
-        [TestMethod]
-        public void QueryBuilder_Should_Select_Item()
-        {
-            var expected = "select * from SIMPLE_OBJECTS where id = @ID";
-
-            var sql = QueryBuilder.Select<SimpleObject>(new SimpleObject());
+            var sql = QueryBuilder.GetSelectTemplate<SimpleObject>();
 
             Assert.AreEqual(expected, sql);
         }
 
         [TestMethod]
-        public void QueryBuilder_Should_Select_Anonymous()
+        public void QueryBuilder_Should_Get_Select_Paging_Template_2012()
         {
-            var expected = "select * from SIMPLE_OBJECTS where name = @Name";
+            var expected = Templates.SqlServer.V2012.PagedSelection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
 
-            var sql = QueryBuilder.Select<SimpleObject>(new { Name = "ABC" });
+            var sql = QueryBuilder.GetSelectPagingTemplate<SimpleObject>();
 
             Assert.AreEqual(expected, sql);
         }
 
         [TestMethod]
-        public void QueryBuilder_Should_Select_Anonymous_Ignore_Not_Found()
+        public void QueryBuilder_Should_Get_Select_Paging_Template_2008()
         {
-            var expected = "select * from SIMPLE_OBJECTS where name = @Name";
+            var expected = Templates.SqlServer.PagedSelection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
 
-            var sql = QueryBuilder.Select<SimpleObject>(new { Name = "ABC", IsModified = false });
+            var sql = QueryBuilder.GetSelectPagingTemplateV2008<SimpleObject>();
 
             Assert.AreEqual(expected, sql);
         }
