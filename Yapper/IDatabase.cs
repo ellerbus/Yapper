@@ -78,6 +78,14 @@ namespace Yapper
         /// 
         /// </summary>
         /// <typeparam name="T"></typeparam>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        IEnumerable<T> Query<T>(IBuilderResults r);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
         /// <param name="sql"></param>
         /// <returns></returns>
         IEnumerable<T> Query<T>(SqlBuilder.Template sql);

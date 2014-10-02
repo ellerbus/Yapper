@@ -198,6 +198,11 @@ namespace Yapper.Core
 
         #region Builder Ops
 
+        public IEnumerable<T> Query<T>(IBuilderResults r)
+        {
+            return Query<T>(r.Sql, r.Parameters);
+        }
+
         public IEnumerable<T> Query<T>(SqlBuilder.Template sql)
         {
             return Query<T>(sql.RawSql, sql.Parameters);

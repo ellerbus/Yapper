@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using UniqueNamespace;
+using UniqueNamespace.Dapper;
 using Yapper.Core;
 using Yapper.Tests.DataObjects;
 
@@ -164,33 +166,15 @@ namespace Yapper.Tests
         }
 
         [TestMethod]
-        public void QueryBuilder_Should_Get_Select_Template()
+        public void QueryBuilder_Should_Get_Use_From_Extension()
         {
-            var expected = Templates.Selection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
+            var expected = "SELECT Count(*) FROM SIMPLE_OBJECTS ";
 
-            var sql = QueryBuilder.GetSelectTemplate<SimpleObject>();
+            var b = new SqlBuilder().From<SimpleObject>();
 
-            Assert.AreEqual(expected, sql);
-        }
+            var t = b.AddTemplate(Templates.Count);
 
-        [TestMethod]
-        public void QueryBuilder_Should_Get_Select_Paging_Template_2012()
-        {
-            var expected = Templates.SqlServer.V2012.PagedSelection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
-
-            var sql = QueryBuilder.GetSelectPagingTemplate<SimpleObject>();
-
-            Assert.AreEqual(expected, sql);
-        }
-
-        [TestMethod]
-        public void QueryBuilder_Should_Get_Select_Paging_Template_2008()
-        {
-            var expected = Templates.SqlServer.PagedSelection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
-
-            var sql = QueryBuilder.GetSelectPagingTemplateV2008<SimpleObject>();
-
-            Assert.AreEqual(expected, sql);
+            Assert.AreEqual(expected, Regex.Replace(t.RawSql, @"\s+", " "));
         }
     }
 }

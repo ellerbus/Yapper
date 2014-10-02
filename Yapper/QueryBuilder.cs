@@ -9,6 +9,7 @@ using Augment;
 using Dapper;
 using EnsureThat;
 using UniqueNamespace;
+using UniqueNamespace.Dapper;
 using Yapper.Core;
 
 namespace Yapper
@@ -22,6 +23,25 @@ namespace Yapper
         public static bool IsDatabaseGenerated(this PropertyInfo p)
         {
             return p.GetCustomAttribute<DatabaseGeneratedAttribute>() != null;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public static class SqlBuilderExtensions
+    {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static SqlBuilder From<T>(this SqlBuilder b)
+        {
+            b.From(MapperHelper.GetTableName(typeof(T)));
+
+            return b;
         }
     }
 
@@ -411,37 +431,6 @@ namespace Yapper
             }
 
             return new BuilderResults(sql, where);
-        }
-
-        #endregion
-
-        #region Select Template
-
-        /// <summary>
-        /// Gets a basic select template using mapped type
-        /// </summary>
-        /// <returns></returns>
-        public static string GetSelectTemplate<T>()
-        {
-            return Templates.Selection.Replace("{{FROM}}", "from " + MapperHelper.GetTableName(typeof(T)));
-        }
-
-        /// <summary>
-        /// Gets a basic select template using mapped type (SQL SERVER V2012)
-        /// </summary>
-        /// <returns></returns>
-        public static string GetSelectPagingTemplate<T>()
-        {
-            return Templates.SqlServer.V2012.PagedSelection.Replace("{{FROM}}", "from " + MapperHelper.GetTableName(typeof(T)));
-        }
-
-        /// <summary>
-        /// Gets a basic select template using mapped type (SQL SERVER V2008)
-        /// </summary>
-        /// <returns></returns>
-        public static string GetSelectPagingTemplateV2008<T>()
-        {
-            return Templates.SqlServer.PagedSelection.Replace("{{FROM}}", "from " + MapperHelper.GetTableName(typeof(T)));
         }
 
         #endregion
