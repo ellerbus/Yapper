@@ -354,6 +354,67 @@ namespace Yapper
 
         #endregion
 
+        #region Select SQL
+
+        /// <summary>
+        /// Generates the ONLY the Sql to select from the database
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns>SQL</returns>
+        public static string Select<T>()
+        {
+            Type type = typeof(T);
+
+            int key = CreateKey("S", typeof(T), null);
+
+            string sql = null;
+
+            if (!_sqlCache.TryGetValue(key, out sql))
+            {
+                StringBuilder sqlb = new StringBuilder("select * from ");
+
+                sqlb.Append(MapperHelper.GetTableName(type));
+
+                sql = sqlb.ToString();
+
+                _sqlCache[key] = sql;
+            }
+
+            return sql;
+        }
+
+        /// <summary>
+        /// Generates the Sql to select from the database
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="where">Conditions to select</param>
+        /// <returns>SQL</returns>
+        public static IBuilderResults Select<T>(object where)
+        {
+            Ensure.That(where, "where").IsNotNull();
+
+            Type type = typeof(T);
+
+            int key = CreateKey("S", typeof(T), where.GetType());
+
+            string sql = null;
+
+            if (!_sqlCache.TryGetValue(key, out sql))
+            {
+                StringBuilder sqlb = new StringBuilder("select * from ");
+
+                sqlb.Append(MapperHelper.GetTableName(type)).Append(GetWhere(type, where));
+
+                sql = sqlb.ToString();
+
+                _sqlCache[key] = sql;
+            }
+
+            return new BuilderResults(sql, where);
+        }
+
+        #endregion
+
         #region Select Template
 
         /// <summary>

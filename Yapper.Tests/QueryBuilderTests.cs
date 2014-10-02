@@ -144,6 +144,26 @@ namespace Yapper.Tests
         }
 
         [TestMethod]
+        public void QueryBuilder_Should_Select_All()
+        {
+            var expected = "select * from SIMPLE_OBJECTS";
+
+            var sql = QueryBuilder.Select<SimpleObject>();
+
+            Assert.AreEqual(expected, sql);
+        }
+
+        [TestMethod]
+        public void QueryBuilder_Should_Select_Item()
+        {
+            var expected = "select * from SIMPLE_OBJECTS where id = @ID";
+
+            var sql = QueryBuilder.Select<SimpleObject>(new { ID = 0 });
+
+            Assert.AreEqual(expected, sql.Sql);
+        }
+
+        [TestMethod]
         public void QueryBuilder_Should_Get_Select_Template()
         {
             var expected = Templates.Selection.Replace("{{FROM}}", "from SIMPLE_OBJECTS");
