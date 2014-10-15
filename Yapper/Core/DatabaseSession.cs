@@ -227,6 +227,20 @@ namespace Yapper.Core
 
         #region CUD Ops
 
+        public IEnumerable<T> Select<T>()
+        {
+            IBuilderResults r = QueryBuilder.Select<T>(null);
+
+            return Query<T>(r);
+        }
+
+        public IEnumerable<T> Select<T>(object where)
+        {
+            IBuilderResults r = QueryBuilder.Select<T>(where);
+
+            return Query<T>(r);
+        }
+
         public int Insert<T>(object data)
         {
             IBuilderResults r = QueryBuilder.Insert<T>(data);

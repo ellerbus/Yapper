@@ -116,7 +116,18 @@ namespace Yapper
         #region CUD Ops
 
         /// <summary>
-        /// Inserts a new item w/o all properties assigned
+        /// Selects all items from a single table
+        /// </summary>
+        IEnumerable<T> Select<T>();
+
+        /// <summary>
+        /// Selects items based on filter from a single table
+        /// </summary>
+        /// <param name="where">Properties to use for filtering (all records if null)</param>
+        IEnumerable<T> Select<T>(object where);
+
+        /// <summary>
+        /// Inserts a new item w/o all properties assigned of 'T'
         /// </summary>
         int Insert<T>(object data);
 
@@ -129,7 +140,7 @@ namespace Yapper
         /// Updates a new item w/o all properties assigned
         /// </summary>
         /// <param name="update">Properties to use for updating</param>
-        /// <param name="where">Properties to use for filtering (all if null)</param>
+        /// <param name="where">Properties to use for filtering (all records if null)</param>
         int Update<T>(object update, object where);
 
         /// <summary>
@@ -140,7 +151,7 @@ namespace Yapper
         /// <summary>
         /// Deletes items based on filter
         /// </summary>
-        /// <param name="where">Properties to use for filtering (all if null)</param>
+        /// <param name="where">Properties to use for filtering (all records if null)</param>
         int Delete<T>(object where);
 
         /// <summary>
