@@ -35,9 +35,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Dapper, Version=1.34.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Dapper, Version=1.36.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.34\lib\net45\Dapper.dll</HintPath>
+      <HintPath>..\packages\Dapper.1.36\lib\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Moq, Version=4.2.1409.1722, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
@@ -55,8 +55,9 @@
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Data" />
-    <Reference Include="UniqueNamespace.SqlBuilder">
-      <HintPath>..\packages\UniqueNamespace.SqlBuilder.2.0.1\lib\UniqueNamespace.SqlBuilder.dll</HintPath>
+    <Reference Include="UniqueNamespace.SqlBuilder, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\UniqueNamespace.SqlBuilder.2.0.2\lib\UniqueNamespace.SqlBuilder.dll</HintPath>
     </Reference>
     <Reference Include="UniqueNamespace.SqlBuilder.Dapper">
       <HintPath>..\packages\UniqueNamespace.SqlBuilder.Dapper.2.0.1\lib\UniqueNamespace.SqlBuilder.Dapper.dll</HintPath>

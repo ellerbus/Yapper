@@ -37,9 +37,9 @@
     <Reference Include="Augment">
       <HintPath>..\packages\Augment.1.0.5305.28651\lib\net45\Augment.dll</HintPath>
     </Reference>
-    <Reference Include="Dapper, Version=1.35.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Dapper, Version=1.36.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.35\lib\net45\Dapper.dll</HintPath>
+      <HintPath>..\packages\Dapper.1.36\lib\net45\Dapper.dll</HintPath>
     </Reference>
     <Reference Include="EnsureThat">
       <HintPath>..\packages\Ensure.That.2.0.0\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\EnsureThat.dll\EnsureThat.dll</HintPath>
@@ -54,8 +54,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="UniqueNamespace.SqlBuilder">
-      <HintPath>..\packages\UniqueNamespace.SqlBuilder.2.0.1\lib\UniqueNamespace.SqlBuilder.dll</HintPath>
+    <Reference Include="UniqueNamespace.SqlBuilder, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\UniqueNamespace.SqlBuilder.2.0.2\lib\UniqueNamespace.SqlBuilder.dll</HintPath>
     </Reference>
     <Reference Include="UniqueNamespace.SqlBuilder.Dapper">
       <HintPath>..\packages\UniqueNamespace.SqlBuilder.Dapper.2.0.1\lib\UniqueNamespace.SqlBuilder.Dapper.dll</HintPath>
