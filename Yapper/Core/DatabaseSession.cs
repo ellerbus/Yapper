@@ -229,9 +229,9 @@ namespace Yapper.Core
 
         public IEnumerable<T> Select<T>()
         {
-            IBuilderResults r = QueryBuilder.Select<T>(null);
+            string sql = QueryBuilder.Select<T>();
 
-            return Query<T>(r);
+            return Query<T>(sql);
         }
 
         public IEnumerable<T> Select<T>(object where)
