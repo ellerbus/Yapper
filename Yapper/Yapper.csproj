@@ -2,12 +2,12 @@
   <PropertyGroup>
     <TargetFrameworks>net46;net47;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.0</Version>
+    <Version>2.0.1</Version>
     <Description>Yep Another Wrapper for Dapper. This wrapper provides a simple Unit of Work pattern for isolating transactional business rules, cache and crud layer.</Description>
     <PackageProjectUrl>https://github.com/ellerbus/Yapper</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/ellerbus/Yapper/blob/master/LICENSE</PackageLicenseUrl>
-    <AssemblyVersion>2.0.0.0</AssemblyVersion>
-    <FileVersion>2.0.0.0</FileVersion>
+    <AssemblyVersion>2.0.1.0</AssemblyVersion>
+    <FileVersion>2.0.1.0</FileVersion>
     <PackageTags>dapper unitofwork microorm</PackageTags>
     <PackageReleaseNotes>2.0.0 Refactor
 1.0.0 Initial</PackageReleaseNotes>

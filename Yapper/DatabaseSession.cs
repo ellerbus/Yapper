@@ -4,7 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 
-namespace Yapper.Core
+namespace Yapper
 {
     /// <summary>
     /// Represents an open connection to a specified database by wrapping
@@ -31,7 +31,7 @@ namespace Yapper.Core
     /// and
     /// https://github.com/wcabus/DapperContext
     /// </summary>
-    sealed class DatabaseSession : IDatabaseSession
+    public sealed class DatabaseSession : IDatabaseSession
     {
         #region Members
 
