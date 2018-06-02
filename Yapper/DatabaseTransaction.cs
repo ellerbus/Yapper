@@ -8,7 +8,30 @@ using EnsureThat;
 
 namespace Yapper.Core
 {
-    sealed class DatabaseTransaction : IDatabaseTransaction
+
+    /// <summary>
+    /// Represents a unit of work to be performed against the database by wrapping
+    /// an <see cref="IDbTransaction"/> instance.
+    /// </summary>
+    public interface IDatabaseTransaction : IDisposable
+    {
+        /// <summary>
+        /// Commits the Unit of Work
+        /// </summary>
+        void Commit();
+
+        /// <summary>
+        /// Rolls back the Unit of Work
+        /// </summary>
+        void Rollback();
+
+        /// <summary>
+        /// Gets a handle to the underlying <see cref="IDbTransaction"/>
+        /// </summary>
+        IDbTransaction Transaction { get; }
+    }
+
+    public sealed class DatabaseTransaction : IDatabaseTransaction
     {
         #region Members
 

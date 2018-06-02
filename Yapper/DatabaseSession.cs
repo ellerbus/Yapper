@@ -1,18 +1,30 @@
 ﻿using System;
-using System.Dynamic;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using Dapper;
-using System.Reflection.Emit;
-using System.Reflection;
-using UniqueNamespace.Dapper;
 
 namespace Yapper.Core
 {
+    /// <summary>
+    /// Represents an open connection to a specified database by wrapping
+    /// an <see cref="IDbConnection"/> instance.
+    /// </summary>
+    public interface IDatabaseSession : IDisposable
+    {
+        /// <summary>
+        /// Gets a handle to the underlying <see cref="IDbConnection"/>
+        /// </summary>
+        IDbConnection Connection { get; }
+
+        /// <summary>
+        /// Creates a unit of work (creates an underlying database transaction).
+        /// </summary>
+        /// <param name="isolationLevel">Specifies the <see cref="IsolationLevel"/> for this transaction.</param>
+        /// <returns>A <see cref="IDatabaseTransaction"/></returns>
+        IDatabaseTransaction BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted);
+    }
+
     /// <summary>
     /// A database context class for Dapper (https://github.com/SamSaffron/dapper-dot-net),
     /// based on http://blog.gauffin.org/2013/01/ado-net-the-right-way/#.UpWLPMSkrd2
@@ -167,120 +179,6 @@ namespace Yapper.Core
 
                 Connection = null;
             }
-        }
-
-        #endregion
-
-        #region Dapper Ops
-
-        public IEnumerable<T> Query<T>(string sql, object param = null)
-        {
-            //Dapper will open and close the connection for us if necessary.
-
-            return Connection.Query<T>(sql: sql, param: param, transaction: GetCurrentTransaction());
-        }
-
-        public SqlMapper.GridReader QueryMultiple(string sql, object param = null)
-        {
-            //Dapper will open and close the connection for us if necessary.
-
-            return Connection.QueryMultiple(sql: sql, param: param, transaction: GetCurrentTransaction());
-        }
-
-        public int Execute(string sql, object param = null)
-        {
-            //Dapper will open and close the connection for us if necessary.
-
-            return Connection.Execute(sql: sql, param: param, transaction: GetCurrentTransaction());
-        }
-
-        #endregion
-
-        #region Builder Ops
-
-        public IEnumerable<T> Query<T>(IBuilderResults r)
-        {
-            return Query<T>(r.Sql, r.Parameters);
-        }
-
-        public IEnumerable<T> Query<T>(SqlBuilder.Template sql)
-        {
-            return Query<T>(sql.RawSql, sql.Parameters);
-        }
-
-        public SqlMapper.GridReader QueryMultiple(SqlBuilder.Template sql)
-        {
-            return QueryMultiple(sql.RawSql, sql.Parameters);
-        }
-
-        public int Execute(SqlBuilder.Template sql)
-        {
-            return Execute(sql.RawSql, sql.Parameters);
-        }
-
-        public int Execute(IBuilderResults r)
-        {
-            return Execute(r.Sql, r.Parameters);
-        }
-
-        #endregion
-
-        #region CUD Ops
-
-        public IEnumerable<T> Select<T>()
-        {
-            string sql = QueryBuilder.Select<T>();
-
-            return Query<T>(sql);
-        }
-
-        public IEnumerable<T> Select<T>(object where)
-        {
-            IBuilderResults r = QueryBuilder.Select<T>(where);
-
-            return Query<T>(r);
-        }
-
-        public int Insert<T>(object data)
-        {
-            IBuilderResults r = QueryBuilder.Insert<T>(data);
-
-            return Execute(r);
-        }
-
-        public int Insert<T>(T item)
-        {
-            IBuilderResults r = QueryBuilder.Insert<T>(item);
-
-            return Execute(r);
-        }
-
-        public int Update<T>(object set, object where)
-        {
-            IBuilderResults r = QueryBuilder.Update<T>(set, where);
-
-            return Execute(r);
-        }
-
-        public int Update<T>(T item)
-        {
-            IBuilderResults r = QueryBuilder.Update<T>(item);
-
-            return Execute(r);
-        }
-
-        public int Delete<T>(object where)
-        {
-            IBuilderResults r = QueryBuilder.Delete<T>(where);
-
-            return Execute(r);
-        }
-
-        public int Delete<T>(T item)
-        {
-            IBuilderResults r = QueryBuilder.Delete<T>(item);
-
-            return Execute(r);
         }
 
         #endregion

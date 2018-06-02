@@ -1,89 +1,24 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{721617BB-3C51-4171-8711-06E8249EACF1}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Yapper</RootNamespace>
-    <AssemblyName>Yapper</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Debug\Yapper.XML</DocumentationFile>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DocumentationFile>bin\Release\Yapper.XML</DocumentationFile>
+    <TargetFrameworks>net46;net47;netstandard2.0</TargetFrameworks>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>2.0.0</Version>
+    <Description>Yep Another Wrapper for Dapper. This wrapper provides a simple Unit of Work pattern for isolating transactional business rules, cache and crud layer.</Description>
+    <PackageProjectUrl>https://github.com/ellerbus/Yapper</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/ellerbus/Yapper/blob/master/LICENSE</PackageLicenseUrl>
+    <AssemblyVersion>2.0.0.0</AssemblyVersion>
+    <FileVersion>2.0.0.0</FileVersion>
+    <PackageTags>dapper unitofwork microorm</PackageTags>
+    <PackageReleaseNotes>2.0.0 Refactor
+1.0.0 Initial</PackageReleaseNotes>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Augment">
-      <HintPath>..\packages\Augment.1.0.5305.28651\lib\net45\Augment.dll</HintPath>
-    </Reference>
-    <Reference Include="Dapper, Version=1.36.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Dapper.1.36\lib\net45\Dapper.dll</HintPath>
-    </Reference>
-    <Reference Include="EnsureThat">
-      <HintPath>..\packages\Ensure.That.2.0.0\lib\portable-net4+sl5+netcore45+wpa81+wp8+MonoAndroid1+MonoTouch1\EnsureThat.dll\EnsureThat.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="UniqueNamespace.SqlBuilder, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\UniqueNamespace.SqlBuilder.2.0.2\lib\UniqueNamespace.SqlBuilder.dll</HintPath>
-    </Reference>
-    <Reference Include="UniqueNamespace.SqlBuilder.Dapper">
-      <HintPath>..\packages\UniqueNamespace.SqlBuilder.Dapper.2.0.1\lib\UniqueNamespace.SqlBuilder.Dapper.dll</HintPath>
-    </Reference>
+    <PackageReference Include="Augment" Version="3.0.0" />
+    <PackageReference Include="Dapper" Version="1.50.5" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Core\ColumnNameResolver.cs" />
-    <Compile Include="Core\DapperMapper.cs" />
-    <Compile Include="Core\MapperHelper.cs" />
-    <Compile Include="QueryBuilder.cs" />
-    <Compile Include="Core\DatabaseTransaction.cs" />
-    <Compile Include="Core\DatabaseSession.cs" />
-    <Compile Include="Core\TableNameResolver.cs" />
-    <Compile Include="Database.cs" />
-    <Compile Include="IDatabase.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Reference Include="System.ComponentModel.DataAnnotations">
+      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5\System.ComponentModel.DataAnnotations.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>
