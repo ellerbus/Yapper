@@ -8,7 +8,6 @@ using System.Text;
 using Augment;
 using Dapper;
 using EnsureThat;
-using Yapper.Core;
 
 namespace Yapper
 {
