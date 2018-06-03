@@ -6,8 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Augment;
-using Dapper;
-using EnsureThat;
 
 namespace Yapper
 {
@@ -41,6 +39,11 @@ namespace Yapper
             return column;
         }
 
+        public static bool IsColumn(this PropertyInfo p)
+        {
+            return Attribute.GetCustomAttribute(p, typeof(ColumnAttribute), true) != null;
+        }
+
         public static bool IsPrimaryKey(this PropertyInfo p)
         {
             return Attribute.GetCustomAttribute(p, typeof(KeyAttribute), true) != null;
@@ -69,7 +72,7 @@ namespace Yapper
         {
             IList<PropertyInfo> properties = type
                 .GetProperties()
-                .Where(x => x.GetCustomAttribute<ColumnAttribute>() != null)
+                .Where(x => x.IsColumn())
                 .ToList();
 
             return properties;
@@ -437,7 +440,7 @@ namespace Yapper
             {
                 foreach (PropertyInfo pi in where.GetType().GetProperties())
                 {
-                    PropertyInfo p = properties.First(x => x.Name == pi.Name);
+                    PropertyInfo p = properties.First(x => x.Name.IsSameAs(pi.Name));
 
                     sql.AppendIf(sql.Length > 0, $"{NL}{pad}  and   ")
                         .Append(p.GetColumnName())
