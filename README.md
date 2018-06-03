@@ -33,3 +33,23 @@ var sql = StatementBuilder.SaveOne<Member>(); /* performs update then insert whe
 var sql = StatementBuilder.SelectOne<Member>( /*[optional anonymous where]*/ );
 var sql = StatementBuilder.SelectMany<Member>( /*[optional anonymous where]*/ );
 ```
+
+### Sample Usage
+
+``` csharp
+public class Member
+{
+    [Key]
+    [Required]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int MemberId { get; set; }
+    
+    [Required]
+    [MaxLength(50)]
+    public string MemberName { get; set; }
+}
+
+var sql = StatementBuilder.SelectOne<Member>(new { MemberId = 1 });
+
+Member member = Connection.Query<Member>(sql).FirstOrDefault();
+```
