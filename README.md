@@ -23,6 +23,8 @@ using (var db = new DatabaseSession(myIDbConnection))
 
 ### CRUD Statement Builders (MSSQL Dialect)
 
+Supports both composite keys and identities (requires DataAnnotation decorations).
+
 ``` csharp
 var sql = StatementBuilder.InsertOne<Member>();
 var sql = StatementBuilder.UpdateOne<Member>();
