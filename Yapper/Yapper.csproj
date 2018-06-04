@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFrameworks>net46;net47;netstandard2.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.0.2</Version>
+    <Version>2.0.3</Version>
     <Description>Yep Another Wrapper for Dapper. This wrapper provides a simple Unit of Work pattern for isolating transactional business rules, cache and crud layer.</Description>
     <PackageProjectUrl>https://github.com/ellerbus/Yapper</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/ellerbus/Yapper/blob/master/LICENSE</PackageLicenseUrl>
