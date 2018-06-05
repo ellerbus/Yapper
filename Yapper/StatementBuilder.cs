@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -33,8 +31,7 @@ namespace Yapper
         #region Save SQL
 
         /// <summary>
-        /// Generates the ONLY the Sql to insert into the database
-        /// (typcially used with 'many' updates of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to insert into the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>
@@ -114,7 +111,7 @@ namespace Yapper
             StringBuilder sqlb = new StringBuilder($"{NL}{S4}update  {table} with (serializable)");
 
             string sets = properties
-                .Where(x => !x.IsDatabaseGenerated())
+                .Where(x => !x.IsDatabaseGenerated() && !x.IsPrimaryKey())
                 .Select(x => $"{x.GetColumnName()} = {P}{x.Name}")
                 .Join($",{NL}{S12}");
 
@@ -129,8 +126,7 @@ namespace Yapper
         #region Insert SQL
 
         /// <summary>
-        /// Generates the ONLY the Sql to insert into the database
-        /// (typcially used with 'many' updates of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to insert into the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>
@@ -167,7 +163,7 @@ namespace Yapper
                     .Append($"{NL}{S8}" + parms)
                     .Append($"{NL}{S4})");
 
-                if (properties.Any(x => x.IsDatabaseGenerated()))
+                if (properties.Any(x => x.IsIdentity()))
                 {
                     sqlb.Append($"{NL}select ident_current('dbo.{table}')");
                 }
@@ -185,8 +181,7 @@ namespace Yapper
         #region Update SQL
 
         /// <summary>
-        /// Generates the ONLY the Sql to update the database
-        /// (typcially used with 'many' updates of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to update the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>
@@ -207,7 +202,7 @@ namespace Yapper
                 StringBuilder sqlb = new StringBuilder($"update  {table}");
 
                 string sets = properties
-                    .Where(x => !x.IsDatabaseGenerated())
+                    .Where(x => !x.IsDatabaseGenerated() && !x.IsPrimaryKey())
                     .Select(x => $"{x.GetColumnName()} = {P}{x.Name}")
                     .Join($",{NL}{S8}");
 
@@ -227,8 +222,7 @@ namespace Yapper
         #region Delete SQL
 
         /// <summary>
-        /// Generates the ONLY the Sql to delete from the database
-        /// (typcially used with 'many' deletes of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to delete from the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>
@@ -260,8 +254,7 @@ namespace Yapper
         #region Select SQL
 
         /// <summary>
-        /// Generates the ONLY the Sql to select from the database
-        /// (typcially used with 'many' deletes of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to select from the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>
@@ -300,8 +293,7 @@ namespace Yapper
         }
 
         /// <summary>
-        /// Generates the ONLY the Sql to select from the database
-        /// (typcially used with 'many' deletes of individual objects and 'foreach' loop)
+        /// Generates ONLY the Sql to select from the database
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns>SQL</returns>

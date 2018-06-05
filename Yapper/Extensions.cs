@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Reflection;
+using Augment;
 
 namespace Yapper
 {
@@ -29,7 +30,7 @@ namespace Yapper
 
             ColumnAttribute ca = p.GetCustomAttribute<ColumnAttribute>();
 
-            if (ca != null)
+            if (ca != null && ca.Name.IsNotEmpty())
             {
                 column = ca.Name;
             }
